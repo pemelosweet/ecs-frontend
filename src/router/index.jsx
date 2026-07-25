@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import MainLayout from '@/layouts/MainLayout'
+import HomePage from '@/pages/HomePage'
 import FormPage from '@/pages/FormPage'
 import NotFound from '@/pages/NotFound'
 
@@ -9,7 +10,8 @@ export const routes = [
     path: '/',
     element: <MainLayout />,
     children: [
-      { index: true, element: <Navigate to="/form" replace /> },
+      { index: true, element: <Navigate to="/home" replace /> },
+      { path: 'home', element: <HomePage /> },
       { path: 'form', element: <FormPage /> },
     ],
   },
