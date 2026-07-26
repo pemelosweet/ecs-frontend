@@ -18,3 +18,9 @@ pnpm-debug.log*
 test-results/
 playwright-report/
 coverage/
+
+# Qoder RepoWiki 自动生成产物
+.qoder/repowiki/
+
+# 头脑风暴可视化会话产物
+.superpowers/
