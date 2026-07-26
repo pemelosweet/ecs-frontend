@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 按已批准的设计文档（`docs/superpowers/specs/2026-07-26-layout-style-redesign-design.md`）将系统升级为「云控台浅色蓝」风格：白色侧栏 + 靛蓝 `#2f54eb` 主色 + 描边卡片，并修复 404 页死链。
+**Goal:** 按已批准的设计文档（`docs/2026-07-26-layout-style-redesign-design.md`）将系统升级为「云控台浅色蓝」风格：白色侧栏 + 靛蓝 `#2f54eb` 主色 + 描边卡片，并修复 404 页死链。
 
 **Architecture:** 全部视觉变化通过 antd 5 `ConfigProvider` 主题 token（含 Layout/Menu 组件级 token）+ `MainLayout.jsx` 结构精修实现，页面代码不散落硬编码色值；不引入新依赖，不改业务逻辑与接口。
 
@@ -102,7 +102,7 @@ git commit -m "fix: 修复404页返回首页死链并补充单元测试"
       locale={zhCN}
       theme={{
         token: {
-          // 云控台浅色蓝：设计令牌见 docs/superpowers/specs/2026-07-26-layout-style-redesign-design.md
+          // 云控台浅色蓝：设计令牌见 docs/2026-07-26-layout-style-redesign-design.md
           colorPrimary: '#2f54eb',
           borderRadius: 8,
           colorBgLayout: '#f5f7fa',
