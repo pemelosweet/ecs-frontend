@@ -74,7 +74,11 @@ test.describe('表单页 - 页面加载与初始化', () => {
 test.describe('表单页 - API 回填数据', () => {
   test('mock /api/forms/latest 返回数据后表单回填', async ({ page }) => {
     await page.route('**/api/forms/latest', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_LATEST) })
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(MOCK_LATEST),
+      })
     )
 
     await page.goto('/form')

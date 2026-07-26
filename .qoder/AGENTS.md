@@ -41,20 +41,20 @@ src/
 
 开发任务须按阶段调用对应技能，入口为 `using-superpowers`（网关，负责调度）：
 
-| 阶段 | 技能 | 职责 |
-|---|---|---|
-| 分支隔离 | `using-git-worktrees` | 动工前建隔离工作区 |
-| 需求分析文档 | `brainstorming` | 动代码前澄清意图、边界与方案 |
-| 计划文档 | `writing-plans` | 多步任务先写分步计划 |
-| 按计划实施 | `subagent-driven-development` | 逐任务实施 + 子代理双重评审 |
-| 编码前 | `test-driven-development` | 先定验证标准再写实现 |
-| 遇到 bug | `systematic-debugging` | 先定位根因，禁止瞎猜修 |
-| 宣告完成前 | `verification-before-completion` | 先跑验证拿证据，再说"完成" |
-| 评审 | `requesting-code-review` / `receiving-code-review` | 请求评审 / 处理评审意见 |
-| 收尾 | `finishing-a-development-branch` | 分支合并 |
-| UI 交互 | `ui-interaction` | 页面交互规范与验收走查 |
-| 质量门禁 | `code-quality-check` | 诊断/测试/构建全绿才算过 |
-| 并行派发（按需） | `dispatching-parallel-agents` | 计划含 ≥2 无依赖子任务时，拆分并分配给多个 agent 并行执行 |
+| 阶段             | 技能                                               | 职责                                                      |
+| ---------------- | -------------------------------------------------- | --------------------------------------------------------- |
+| 分支隔离         | `using-git-worktrees`                              | 动工前建隔离工作区                                        |
+| 需求分析文档     | `brainstorming`                                    | 动代码前澄清意图、边界与方案                              |
+| 计划文档         | `writing-plans`                                    | 多步任务先写分步计划                                      |
+| 按计划实施       | `subagent-driven-development`                      | 逐任务实施 + 子代理双重评审                               |
+| 编码前           | `test-driven-development`                          | 先定验证标准再写实现                                      |
+| 遇到 bug         | `systematic-debugging`                             | 先定位根因，禁止瞎猜修                                    |
+| 宣告完成前       | `verification-before-completion`                   | 先跑验证拿证据，再说"完成"                                |
+| 评审             | `requesting-code-review` / `receiving-code-review` | 请求评审 / 处理评审意见                                   |
+| 收尾             | `finishing-a-development-branch`                   | 分支合并                                                  |
+| UI 交互          | `ui-interaction`                                   | 页面交互规范与验收走查                                    |
+| 质量门禁         | `code-quality-check`                               | 诊断/测试/构建全绿才算过                                  |
+| 并行派发（按需） | `dispatching-parallel-agents`                      | 计划含 ≥2 无依赖子任务时，拆分并分配给多个 agent 并行执行 |
 
 #### 开发流程（按任务类型选模式）
 
@@ -112,14 +112,15 @@ src/
 **何时触发：** 标准模式步骤 4（subagent-driven-development）阶段，计划拆分出 ≥2 个互不依赖的子任务时自动启用。
 
 **典型场景：**
+
 - 同时新增 2+ 个独立页面（如 FormPage + OrgPage，互无数据依赖）
 - 前端页面 + 后端 API mock 可同步开发
 - 多个不共享状态的组件并行实现
 
 **执行方式：**
+
 1. `dispatching-parallel-agents`：将独立子任务分配给多个 agent 并行执行
 2. `subagent-driven-development`：管理各 agent 生命周期，汇总结果，处理冲突
 3. 所有并行子任务完成后，统一进入步骤 5（TDD）继续后续流程
 
 **不适用：** 子任务间有共享状态、相互调用、或操作同一文件时，必须串行执行
-

@@ -1,11 +1,7 @@
 import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Breadcrumb, Button, Avatar, theme } from 'antd'
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  UserOutlined,
-} from '@ant-design/icons'
+import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from '@ant-design/icons'
 import { menuConfig, findMenuByPath } from '@/router/menuConfig'
 
 const { Header, Sider, Content } = Layout
@@ -89,10 +85,7 @@ export default function MainLayout() {
         <Content style={{ margin: 16 }}>
           <Breadcrumb
             style={{ marginBottom: 16 }}
-            items={[
-              { title: '首页' },
-              { title: current?.label || '未知页面' },
-            ]}
+            items={[{ title: '首页' }, { title: current?.label || '未知页面' }]}
           />
           {/* 不再包白色容器：内容区露出 #f5f7fa 底色，页面自己的 Card 即描边卡片 */}
           <Outlet />
