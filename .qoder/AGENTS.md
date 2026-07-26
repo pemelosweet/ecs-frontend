@@ -32,6 +32,8 @@ src/
 - 开发：`npm run dev`；构建：`npm run build` → `dist/`
 - 部署：由后端仓库 `/opt/backend` 的 docker-compose 统一管理，前端不单独部署
 - Git：主分支 `main`，中文提交信息 `类型: 描述`（feat/fix/chore/docs/refactor）
+- 分支红线：任何开发产出（含设计文档/计划文档）都必须先建 feature 分支再提交，禁止直接提交 main；合入走 PR
+- 文档位置：设计/计划等生成文档直接放 `docs/` 目录下，不建 `docs/superpowers` 子目录
 - 测试：单元/集成用 Vitest + RTL（`npm test`，单元同目录 `*.test.jsx`，集成在 `tests/integration/`）；e2e 用 Playwright（`npm run test:e2e`，用例在 `e2e/`）
 - CI/CD：（暂未实现）
 
