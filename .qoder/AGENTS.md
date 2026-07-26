@@ -46,7 +46,7 @@ src/
 | 分支隔离 | `using-git-worktrees` | 动工前建隔离工作区 |
 | 需求分析文档 | `brainstorming` | 动代码前澄清意图、边界与方案 |
 | 计划文档 | `writing-plans` | 多步任务先写分步计划 |
-| 按计划实施 | `executing-plans` | 带检查点逐步执行 |
+| 按计划实施 | `subagent-driven-development` | 逐任务实施 + 子代理双重评审 |
 | 编码前 | `test-driven-development` | 先定验证标准再写实现 |
 | 遇到 bug | `systematic-debugging` | 先定位根因，禁止瞎猜修 |
 | 宣告完成前 | `verification-before-completion` | 先跑验证拿证据，再说"完成" |
@@ -54,7 +54,7 @@ src/
 | 收尾 | `finishing-a-development-branch` | 分支合并 |
 | UI 交互 | `ui-interaction` | 页面交互规范与验收走查 |
 | 质量门禁 | `code-quality-check` | 诊断/测试/构建全绿才算过 |
-| （按需） | `dispatching-parallel-agents`、`subagent-driven-development` | 并行任务派发 |
+| （按需） | `dispatching-parallel-agents` | 并行任务派发 |
 
 #### 开发流程（按任务类型选模式）
 
@@ -64,11 +64,12 @@ src/
 ├── 1. using-git-worktrees            # 建隔离工作区
 ├── 2. brainstorming                  # 需求澄清：意图/边界/方案 用户确认，唯一确认源
 ├── 3. writing-plans                  # 制定分步计划
-├── 4. executing-plans                # 带检查点实施
+├── 4. subagent-driven-development    # 逐任务实施 + 子代理评审
 ├── 5. test-driven-development        # TDD
-├── 6. verification-before-completion # 跑验证拿证据
-├── 7. code-review                    # requesting / receiving
-└── 8. finishing-a-development-branch # 收尾：分支合并
+├── 6. code-quality-check             # 质量门禁：诊断/单测/e2e/构建
+├── 7. verification-before-completion # 跑验证拿证据
+├── 8. code-review                    # requesting / receiving
+└── 9. finishing-a-development-branch # 收尾：分支合并
 ```
 
 **轻量模式：小改动 / 单文件（极简，跳过澄清与计划）**
@@ -86,7 +87,7 @@ src/
 ```
 ├── 1. systematic-debugging           # 定位根因后修复
 ├── 2. code-review                    # 代码审查
-├── 3. verification-before-completion # 验证修复生效
+├── 3. verification-before-completion # 验证修复生效（含 e2e 冒烟）
 └── 4. finishing-a-development-branch # 收尾提交
 ```
 
