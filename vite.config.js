@@ -20,4 +20,12 @@ export default defineConfig({
       },
     },
   },
+  // Vitest 配置（单元 + 集成测试）
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './tests/setup.js',
+    include: ['src/**/*.test.{js,jsx}', 'tests/integration/**/*.test.{js,jsx}'],
+    css: false,
+  },
 })
