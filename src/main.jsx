@@ -12,7 +12,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       locale={zhCN}
       theme={{
         token: {
-          // 云控台浅色蓝：设计令牌见 docs/superpowers/specs/2026-07-26-layout-style-redesign-design.md
+          // 云控台浅色蓝：设计令牌见 docs/2026-07-26-layout-style-redesign-design.md
           colorPrimary: '#2f54eb',
           borderRadius: 8,
           colorBgLayout: '#f5f7fa',
