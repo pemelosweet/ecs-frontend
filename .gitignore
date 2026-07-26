@@ -24,3 +24,6 @@ coverage/
 
 # 头脑风暴可视化会话产物
 .superpowers/
+
+# git worktree 隔离工作区
+.worktrees/
