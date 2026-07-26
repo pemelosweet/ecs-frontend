@@ -52,9 +52,12 @@ src/
 | 收尾 | `finishing-a-development-branch` | 分支合并 |
 | UI 交互 | `ui-interaction` | 页面交互规范与验收走查 |
 | 质量门禁 | `code-quality-check` | 诊断/测试/构建全绿才算过 |
-| （按需） | `dispatching-parallel-agents`、`subagent-driven-development` | 并行任务派发 |
+| 并行派发（按需） | `dispatching-parallel-agents` | 计划含 ≥2 无依赖子任务时，拆分并分配给多个 agent 并行执行 |
+| 并行管理（按需） | `subagent-driven-development` | 管理并行 agent 生命周期、汇总结果、处理冲突与合并 |
 
 #### 开发流程（按任务类型选模式）
+
+> 最低保障：每条路径必须满足 **有分支隔离 + 有质量门禁 + 有验证证据**
 
 **标准模式：新功能 / 多步任务**
 
@@ -63,28 +66,60 @@ src/
 ├── 2. brainstorming                  # 需求澄清：意图/边界/方案 用户确认，唯一确认源
 ├── 3. writing-plans                  # 制定分步计划
 ├── 4. executing-plans                # 带检查点实施
-├── 5. test-driven-development        # TDD
-├── 6. verification-before-completion # 跑验证拿证据
-├── 7. code-review                    # requesting / receiving
-└── 8. finishing-a-development-branch # 收尾：分支合并
+│       ├─ 若计划含 ≥2 个无依赖子任务 → dispatching-parallel-agents 并行派发
+│       └─ 各子任务独立推进 → subagent-driven-development 管理生命周期
+├── 5. test-driven-development        # TDD（API 相关须含 mock 覆盖）
+├── 6. code-quality-check             # 质量门禁：lint/测试/构建全绿
+├── 7. ui-interaction                 # 页面改动时：交互走查 + npm run test:e2e
+├── 8. verification-before-completion # 跑验证拿证据
+├── 9. code-review                    # requesting / receiving
+│       ↻ review 打回 → 回到步骤 5 修复后重新走 6-8
+└── 10. finishing-a-development-branch # 收尾：分支合并 + 涉及新页面/API 时更新 docs/
 ```
 
 **轻量模式：小改动 / 单文件（极简，跳过澄清与计划）**
 
 ```
-├── 1. test-driven-development        # TDD
-├── 2. code-quality-check             # 质量门禁：诊断/测试/构建
-├── 3. ui-interaction                 # 交互走查 + npm run test:e2e
-├── 4. code-review                    # requesting / receiving
-└── 5. finishing-a-development-branch # 收尾提交
+├── 1. using-git-worktrees            # 建分支隔离（可简化为 git checkout -b fix/xxx）
+├── 2. test-driven-development        # TDD
+├── 3. code-quality-check             # 质量门禁：诊断/测试/构建
+├── 4. ui-interaction                 # 交互走查 + npm run test:e2e
+├── 5. code-review                    # requesting / receiving
+│       ↻ review 打回 → 回到步骤 2
+└── 6. finishing-a-development-branch # 收尾提交
 ```
 
 **bug 模式：缺陷修复**
 
 ```
-├── 1. systematic-debugging           # 定位根因后修复
-├── 2. code-review                    # 代码审查
-├── 3. verification-before-completion # 验证修复生效
-└── 4. finishing-a-development-branch # 收尾提交
+├── 1. using-git-worktrees            # 建分支隔离
+├── 2. systematic-debugging           # 定位根因后修复
+├── 3. code-quality-check             # 质量门禁：确保修复不引入新问题
+├── 4. verification-before-completion # 验证修复生效
+├── 5. code-review                    # 代码审查
+│       ↻ review 打回 → 回到步骤 2
+└── 6. finishing-a-development-branch # 收尾提交
 ```
+
+#### 失败回退规则
+
+- **验证失败**（步骤 6/7/8）→ 回到 TDD 步骤修复，重新走质量门禁
+- **review 打回** → 回到编码/修复步骤，修完后重跑门禁 + 验证
+- **构建失败** → 优先检查 lint 错误，修复后重跑 `npm run build`
+
+#### 并行执行规则（dispatching-parallel-agents + subagent-driven-development）
+
+**何时触发：** 标准模式步骤 4（executing-plans）阶段，计划拆分出 ≥2 个互不依赖的子任务时自动启用。
+
+**典型场景：**
+- 同时新增 2+ 个独立页面（如 FormPage + OrgPage，互无数据依赖）
+- 前端页面 + 后端 API mock 可同步开发
+- 多个不共享状态的组件并行实现
+
+**执行方式：**
+1. `dispatching-parallel-agents`：将独立子任务分配给多个 agent 并行执行
+2. `subagent-driven-development`：管理各 agent 生命周期，汇总结果，处理冲突
+3. 所有并行子任务完成后，统一进入步骤 5（TDD）继续后续流程
+
+**不适用：** 子任务间有共享状态、相互调用、或操作同一文件时，必须串行执行
 
