@@ -6,6 +6,10 @@ export default defineConfig({
   timeout: 30_000,
   use: {
     baseURL: 'http://localhost:5173',
+    // 仅失败用例保留视频，避免日常跑产生大量产物
+    video: 'retain-on-failure',
+    // 仅失败时截图，便于排查
+    screenshot: 'only-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {

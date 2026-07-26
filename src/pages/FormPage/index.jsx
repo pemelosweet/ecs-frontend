@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Card,
   Form,
@@ -34,8 +34,44 @@ export default function FormPage() {
   const [submitting, setSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  // 从服务端拉取最近一次提交并回填表单（loading 初始即为 true，无需重复置位）
+  const loadLatest = async () => {
+    try {
+      const res = await fetch('/api/forms/latest')
+      const text = await res.text()
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch {
+        data = null
+      }
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      form.setFieldsValue({
+        title: data.title,
+        type: data.type ?? undefined,
+        category: data.category ?? undefined,
+        level: data.level ?? undefined,
+        date: data.date ? dayjs(data.date) : undefined,
+        status: data.status,
+        desc: data.desc ?? undefined,
+        attachments: (data.attachments || []).map((f) => ({
+          uid: `srv-${f.id}`,
+          name: f.name,
+          status: 'done',
+          url: f.url,
+          serverId: f.id,
+        })),
+      })
+    } catch {
+      // 无历史数据时静默忽略
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     loadLatest()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // 提交到 Python 服务存储（multipart/form-data）
@@ -63,45 +99,17 @@ export default function FormPage() {
       const res = await fetch('/api/forms', { method: 'POST', body: fd })
       const text = await res.text()
       let data
-      try { data = JSON.parse(text) } catch { data = null }
+      try {
+        data = JSON.parse(text)
+      } catch {
+        data = null
+      }
       if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
       message.success(`提交成功，记录 ID：${data.id}`)
     } catch (err) {
       message.error(`提交失败：${err.message}`)
     } finally {
       setSubmitting(false)
-    }
-  }
-
-  // 从服务端拉取最近一次提交并回填表单
-  const loadLatest = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/forms/latest')
-      const text = await res.text()
-      let data
-      try { data = JSON.parse(text) } catch { data = null }
-      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
-      form.setFieldsValue({
-        title: data.title,
-        type: data.type ?? undefined,
-        category: data.category ?? undefined,
-        level: data.level ?? undefined,
-        date: data.date ? dayjs(data.date) : undefined,
-        status: data.status,
-        desc: data.desc ?? undefined,
-        attachments: (data.attachments || []).map((f) => ({
-          uid: `srv-${f.id}`,
-          name: f.name,
-          status: 'done',
-          url: f.url,
-          serverId: f.id,
-        })),
-      })
-    } catch {
-      // 无历史数据时静默忽略
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -133,11 +141,7 @@ export default function FormPage() {
           desc: '这是一段默认描述，可直接提交或按需修改。',
         }}
       >
-        <Form.Item
-          name="title"
-          label="标题"
-          rules={[{ required: true, message: '请输入标题' }]}
-        >
+        <Form.Item name="title" label="标题" rules={[{ required: true, message: '请输入标题' }]}>
           <Input placeholder="请输入标题" />
         </Form.Item>
 
@@ -182,11 +186,7 @@ export default function FormPage() {
           valuePropName="fileList"
           getValueFromEvent={normFile}
         >
-          <Dragger
-            multiple
-            maxCount={MAX_FILE_COUNT}
-            beforeUpload={beforeUpload}
-          >
+          <Dragger multiple maxCount={MAX_FILE_COUNT} beforeUpload={beforeUpload}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>

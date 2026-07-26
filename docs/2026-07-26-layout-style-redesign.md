@@ -16,12 +16,12 @@
 
 ## 文件清单
 
-| 操作 | 文件 | 职责 |
-|---|---|---|
-| Create | `src/pages/NotFound/index.test.jsx` | 404 页跳转行为的单元测试（TDD） |
-| Modify | `src/pages/NotFound/index.jsx:20` | 死链 `/dashboard` → `/home` |
-| Modify | `src/main.jsx:13-18` | 注入全套设计令牌 |
-| Modify | `src/index.css:13-16` | body 底色 `#f5f7fa` |
+| 操作   | 文件                                   | 职责                                      |
+| ------ | -------------------------------------- | ----------------------------------------- |
+| Create | `src/pages/NotFound/index.test.jsx`    | 404 页跳转行为的单元测试（TDD）           |
+| Modify | `src/pages/NotFound/index.jsx:20`      | 死链 `/dashboard` → `/home`               |
+| Modify | `src/main.jsx:13-18`                   | 注入全套设计令牌                          |
+| Modify | `src/index.css:13-16`                  | body 底色 `#f5f7fa`                       |
 | Modify | `src/layouts/MainLayout.jsx`（整文件） | 白侧栏 + 品牌区 + 页头用户区 + 去包裹容器 |
 
 ---
@@ -29,6 +29,7 @@
 ### Task 1: 修复 404 页死链（TDD）
 
 **Files:**
+
 - Test: `src/pages/NotFound/index.test.jsx`（新建）
 - Modify: `src/pages/NotFound/index.jsx:20`
 
@@ -90,6 +91,7 @@ git commit -m "fix: 修复404页返回首页死链并补充单元测试"
 ### Task 2: 全局设计令牌注入
 
 **Files:**
+
 - Modify: `src/main.jsx:11-19`
 - Modify: `src/index.css:13-16`
 
@@ -131,8 +133,9 @@ git commit -m "fix: 修复404页返回首页死链并补充单元测试"
 
 ```css
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC',
+    'Microsoft YaHei', sans-serif;
   background: #f5f7fa; /* 与 antd colorBgLayout 保持一致 */
 }
 ```
@@ -157,6 +160,7 @@ git commit -m "feat: 注入云控台浅色蓝全局设计令牌"
 ### Task 3: MainLayout 改造（白侧栏 + 品牌区 + 页头用户区）
 
 **Files:**
+
 - Modify: `src/layouts/MainLayout.jsx`（整文件替换）
 
 - [ ] **Step 1: 用以下完整内容替换 `src/layouts/MainLayout.jsx`**
@@ -165,11 +169,7 @@ git commit -m "feat: 注入云控台浅色蓝全局设计令牌"
 import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Breadcrumb, Button, Avatar, theme } from 'antd'
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  UserOutlined,
-} from '@ant-design/icons'
+import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from '@ant-design/icons'
 import { menuConfig, findMenuByPath } from '@/router/menuConfig'
 
 const { Header, Sider, Content } = Layout
@@ -253,10 +253,7 @@ export default function MainLayout() {
         <Content style={{ margin: 16 }}>
           <Breadcrumb
             style={{ marginBottom: 16 }}
-            items={[
-              { title: '首页' },
-              { title: current?.label || '未知页面' },
-            ]}
+            items={[{ title: '首页' }, { title: current?.label || '未知页面' }]}
           />
           {/* 不再包白色容器：内容区露出 #f5f7fa 底色，页面自己的 Card 即描边卡片 */}
           <Outlet />
@@ -268,6 +265,7 @@ export default function MainLayout() {
 ```
 
 要点核对（防止改丢功能）：
+
 - 折叠按钮、`selectedKeys={[location.pathname]}` 菜单高亮、面包屑、`findMenuByPath` 全部保留
 - 移除了 `theme="dark"`（Sider 与 Menu）与内容白容器 div
 - 新增 `Avatar`、`UserOutlined` 导入，移除不再使用的 `colorBgContainer`、`borderRadiusLG`
@@ -312,6 +310,7 @@ Expected: 构建成功
 - [ ] **Step 5: 视觉走查（ui-interaction 清单）**
 
 启动 `npm run dev`（后台），逐项确认：
+
 - 侧栏白底、选中项浅蓝药丸 `#eef2ff` + 靛蓝字
 - 品牌区 ◆ 靛蓝菱形，折叠后只剩 ◆
 - 页头白底细描边，右侧头像 + 「管理员」

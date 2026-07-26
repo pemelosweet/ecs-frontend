@@ -20,5 +20,4 @@ export const menuConfig = [
 ]
 
 // 扁平化，用于根据路径查找标题（面包屑 / 页签）
-export const findMenuByPath = (path) =>
-  menuConfig.find((item) => item.key === path)
+export const findMenuByPath = (path) => menuConfig.find((item) => item.key === path)

@@ -1,15 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-  Card,
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  Switch,
-  Button,
-  Space,
-  message,
-} from 'antd'
+import { Card, Form, Input, Select, DatePicker, Switch, Button, Space, message } from 'antd'
 import dayjs from 'dayjs'
 
 const { TextArea } = Input
@@ -19,55 +9,17 @@ export default function OrgPage() {
   const [submitting, setSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // 页面初始化时自动加载已保存的组织信息并回填
-  useEffect(() => {
-    loadLatest()
-  }, [])
-
-  // 提交保存（JSON）
-  const onFinish = async (values) => {
-    const payload = {
-      orgName: values.orgName,
-      orgCode: values.orgCode ?? null,
-      orgType: values.orgType ?? null,
-      legalPerson: values.legalPerson ?? null,
-      phone: values.phone ?? null,
-      email: values.email ?? null,
-      address: values.address ?? null,
-      establishDate: values.establishDate
-        ? values.establishDate.format('YYYY-MM-DD')
-        : null,
-      status: values.status ?? true,
-      description: values.description ?? null,
-    }
-
-    setSubmitting(true)
-    try {
-      const res = await fetch('/api/org', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const text = await res.text()
-      let data
-      try { data = JSON.parse(text) } catch { data = null }
-      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
-      message.success(`保存成功，记录 ID：${data.id}`)
-    } catch (err) {
-      message.error(`保存失败：${err.message}`)
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  // 拉取最近一次保存的组织信息回填表单
+  // 拉取最近一次保存的组织信息回填表单（loading 初始即为 true，无需重复置位）
   const loadLatest = async () => {
-    setLoading(true)
     try {
       const res = await fetch('/api/org/latest')
       const text = await res.text()
       let data
-      try { data = JSON.parse(text) } catch { data = null }
+      try {
+        data = JSON.parse(text)
+      } catch {
+        data = null
+      }
       if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
       form.setFieldsValue({
         orgName: data.orgName,
@@ -85,6 +37,50 @@ export default function OrgPage() {
       // 无历史数据时静默忽略
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 页面初始化时自动加载已保存的组织信息并回填
+  useEffect(() => {
+    loadLatest()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // 提交保存（JSON）
+  const onFinish = async (values) => {
+    const payload = {
+      orgName: values.orgName,
+      orgCode: values.orgCode ?? null,
+      orgType: values.orgType ?? null,
+      legalPerson: values.legalPerson ?? null,
+      phone: values.phone ?? null,
+      email: values.email ?? null,
+      address: values.address ?? null,
+      establishDate: values.establishDate ? values.establishDate.format('YYYY-MM-DD') : null,
+      status: values.status ?? true,
+      description: values.description ?? null,
+    }
+
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/org', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const text = await res.text()
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch {
+        data = null
+      }
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      message.success(`保存成功，记录 ID：${data.id}`)
+    } catch (err) {
+      message.error(`保存失败：${err.message}`)
+    } finally {
+      setSubmitting(false)
     }
   }
 
