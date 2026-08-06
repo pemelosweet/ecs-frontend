@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card, Form, Input, Select, DatePicker, Switch, Button, Space, message } from 'antd'
 import dayjs from 'dayjs'
+import Parse from '@/lib/parse'
 
 const { TextArea } = Input
 
@@ -9,18 +10,10 @@ export default function OrgPage() {
   const [submitting, setSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // 拉取最近一次保存的组织信息回填表单（loading 初始即为 true，无需重复置位）
+  // 拉取最近一次保存的组织信息回填表单
   const loadLatest = async () => {
     try {
-      const res = await fetch('/api/org/latest')
-      const text = await res.text()
-      let data
-      try {
-        data = JSON.parse(text)
-      } catch {
-        data = null
-      }
-      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      const data = await Parse.Cloud.run('getLatestOrg')
       form.setFieldsValue({
         orgName: data.orgName,
         orgCode: data.orgCode ?? undefined,
@@ -40,13 +33,12 @@ export default function OrgPage() {
     }
   }
 
-  // 页面初始化时自动加载已保存的组织信息并回填
   useEffect(() => {
     loadLatest()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // 提交保存（JSON）
+  // 提交保存
   const onFinish = async (values) => {
     const payload = {
       orgName: values.orgName,
@@ -63,20 +55,8 @@ export default function OrgPage() {
 
     setSubmitting(true)
     try {
-      const res = await fetch('/api/org', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const text = await res.text()
-      let data
-      try {
-        data = JSON.parse(text)
-      } catch {
-        data = null
-      }
-      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
-      message.success(`保存成功，记录 ID：${data.id}`)
+      const result = await Parse.Cloud.run('saveOrg', payload)
+      message.success(`保存成功，记录 ID：${result.id}`)
     } catch (err) {
       message.error(`保存失败：${err.message}`)
     } finally {

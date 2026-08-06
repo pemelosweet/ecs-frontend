@@ -13,12 +13,16 @@ export default defineConfig({
     port: 5173,
     open: true,
     proxy: {
-      // 转发到 Python 服务（build/server，uvicorn 默认 8000 端口）
-      '/api': {
-        target: 'http://localhost:8000',
+      // 转发到 Parse Server（默认 1337 端口）
+      '/parse': {
+        target: 'http://localhost:1337',
         changeOrigin: true,
       },
     },
+  },
+  optimizeDeps: {
+    // Parse SDK 依赖 Node 的 events 模块，浏览器端需要显式预构建 polyfill
+    include: ['events'],
   },
   // Vitest 配置（单元 + 集成测试）
   test: {

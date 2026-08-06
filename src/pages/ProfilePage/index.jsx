@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Card, Form, Input, Radio, DatePicker, Select, Button, Space, message, Upload } from 'antd'
 import { PlusOutlined, MinusCircleOutlined, UserOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import Parse from '@/lib/parse'
 
 const { TextArea } = Input
 
@@ -18,18 +19,10 @@ export default function ProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState(null) // 当前显示的头像 URL
 
   // 回填最新档案
-  // eslint-disable-next-line complexity
+
   const loadLatest = async () => {
     try {
-      const res = await fetch('/api/profile/latest')
-      const text = await res.text()
-      let data
-      try {
-        data = JSON.parse(text)
-      } catch {
-        data = null
-      }
-      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      const data = await Parse.Cloud.run('getLatestProfile')
       form.setFieldsValue({
         name: data.name,
         gender: data.gender,
@@ -57,7 +50,6 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
-    // 挂载时一次性拉取最新档案（订阅外部数据源，非同步状态联动）
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadLatest()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,43 +69,41 @@ export default function ProfilePage() {
     return false
   }
 
-  // 提交到 /api/profile（multipart/form-data）
+  // 提交
   // eslint-disable-next-line complexity
   const onFinish = async (values) => {
-    const fd = new FormData()
-    fd.append('name', values.name)
-    if (values.gender) fd.append('gender', values.gender)
-    if (values.birthday) fd.append('birthday', values.birthday.format('YYYY-MM-DD'))
-    if (values.phone) fd.append('phone', values.phone)
-    if (values.email) fd.append('email', values.email)
-    if (values.address) fd.append('address', values.address)
-    if (values.website) fd.append('website', values.website)
-    if (values.bio) fd.append('bio', values.bio)
-    if (values.education?.length) fd.append('education', JSON.stringify(values.education))
-    if (values.work?.length) fd.append('work', JSON.stringify(values.work))
-    if (values.skills?.length) fd.append('skills', JSON.stringify(values.skills))
-    if (values.projects?.length) fd.append('projects', JSON.stringify(values.projects))
-    if (values.interests?.length) fd.append('interests', JSON.stringify(values.interests))
-    if (values.socialLinks?.length) {
-      const obj = Object.fromEntries(
-        values.socialLinks.filter((x) => x?.platform).map((x) => [x.platform, x.url || ''])
-      )
-      fd.append('social_links', JSON.stringify(obj))
-    }
-    if (avatarFile) fd.append('avatar', avatarFile)
-
     setSubmitting(true)
     try {
-      const res = await fetch('/api/profile', { method: 'POST', body: fd })
-      const text = await res.text()
-      let data
-      try {
-        data = JSON.parse(text)
-      } catch {
-        data = null
+      const payload = {
+        name: values.name,
+        gender: values.gender || null,
+        birthday: values.birthday ? values.birthday.format('YYYY-MM-DD') : null,
+        phone: values.phone || null,
+        email: values.email || null,
+        address: values.address || null,
+        website: values.website || null,
+        bio: values.bio || null,
+        education: values.education?.length ? values.education : [],
+        work: values.work?.length ? values.work : [],
+        skills: values.skills?.length ? values.skills : [],
+        projects: values.projects?.length ? values.projects : [],
+        interests: values.interests?.length ? values.interests : [],
+        socialLinks: values.socialLinks?.length
+          ? Object.fromEntries(
+              values.socialLinks.filter((x) => x?.platform).map((x) => [x.platform, x.url || ''])
+            )
+          : null,
       }
-      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
-      message.success(`档案已保存（ID：${data.id}）`)
+
+      // 头像上传：先直传 OSS 拿到 Parse.File，再把文件引用传给 Cloud Function
+      if (avatarFile) {
+        const parseFile = new Parse.File(avatarFile.name, avatarFile)
+        await parseFile.save()
+        payload.avatar = parseFile
+      }
+
+      const result = await Parse.Cloud.run('saveProfile', payload)
+      message.success(`档案已保存（ID：${result.id}）`)
       setAvatarFile(null)
     } catch (err) {
       message.error(`保存失败：${err.message}`)
