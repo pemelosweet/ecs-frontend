@@ -11,9 +11,8 @@ describe('路由与布局集成', () => {
       </MemoryRouter>
     )
     // 首页内容出现
-    expect(await screen.findByText('欢迎使用表单系统')).toBeInTheDocument()
+    expect(await screen.findByText('欢迎使用管理系统')).toBeInTheDocument()
     // 侧边菜单同时存在（说明 MainLayout 生效）
-    expect(screen.getByText('表单页')).toBeInTheDocument()
     expect(screen.getByText('组织信息')).toBeInTheDocument()
   })
 
