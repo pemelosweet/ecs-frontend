@@ -22,26 +22,30 @@ export default function ProfilePage() {
 
   const loadLatest = async () => {
     try {
-      const data = await Parse.Cloud.run('getLatestProfile')
-      form.setFieldsValue({
-        name: data.name,
-        gender: data.gender,
-        birthday: data.birthday ? dayjs(data.birthday) : undefined,
-        phone: data.phone,
-        email: data.email,
-        address: data.address,
-        website: data.website,
-        bio: data.bio,
-        education: data.education || [],
-        work: data.work || [],
-        skills: data.skills || [],
-        projects: data.projects || [],
-        interests: data.interests || [],
-        socialLinks: data.socialLinks
-          ? Object.entries(data.socialLinks).map(([platform, url]) => ({ platform, url }))
-          : [],
-      })
-      if (data.avatarUrl) setAvatarPreview(data.avatarUrl)
+      const profile = await new Parse.Query('Profile').descending('createdAt').limit(1).first()
+      if (profile) {
+        const data = profile.attributes
+        form.setFieldsValue({
+          name: data.name,
+          gender: data.gender,
+          birthday: data.birthday ? dayjs(data.birthday) : undefined,
+          phone: data.phone,
+          email: data.email,
+          address: data.address,
+          website: data.website,
+          bio: data.bio,
+          education: data.education || [],
+          work: data.work || [],
+          skills: data.skills || [],
+          projects: data.projects || [],
+          interests: data.interests || [],
+          socialLinks: data.socialLinks
+            ? Object.entries(data.socialLinks).map(([platform, url]) => ({ platform, url }))
+            : [],
+        })
+        const avatarUrl = profile.get('avatar')?.url()
+        if (avatarUrl) setAvatarPreview(avatarUrl)
+      }
     } catch {
       // 无历史数据静默忽略
     } finally {
@@ -95,15 +99,17 @@ export default function ProfilePage() {
           : null,
       }
 
-      // 头像上传：先直传 OSS 拿到 Parse.File，再把文件引用传给 Cloud Function
+      // 头像上传：先直传 OSS 拿到 Parse.File
       if (avatarFile) {
         const parseFile = new Parse.File(avatarFile.name, avatarFile)
         await parseFile.save()
         payload.avatar = parseFile
       }
 
-      const result = await Parse.Cloud.run('saveProfile', payload)
-      message.success(`档案已保存（ID：${result.id}）`)
+      // 直连 /classes 保存（author 由服务端 beforeSave 自动填充）
+      const profile = new Parse.Object('Profile').set(payload)
+      await profile.save()
+      message.success(`档案已保存（ID：${profile.id}）`)
       setAvatarFile(null)
     } catch (err) {
       message.error(`保存失败：${err.message}`)

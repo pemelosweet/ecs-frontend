@@ -13,19 +13,21 @@ export default function OrgPage() {
   // 拉取最近一次保存的组织信息回填表单
   const loadLatest = async () => {
     try {
-      const data = await Parse.Cloud.run('getLatestOrg')
-      form.setFieldsValue({
-        orgName: data.orgName,
-        orgCode: data.orgCode ?? undefined,
-        orgType: data.orgType ?? undefined,
-        legalPerson: data.legalPerson ?? undefined,
-        phone: data.phone ?? undefined,
-        email: data.email ?? undefined,
-        address: data.address ?? undefined,
-        establishDate: data.establishDate ? dayjs(data.establishDate) : undefined,
-        status: data.status,
-        description: data.description ?? undefined,
-      })
+      const org = await new Parse.Query('Org').descending('createdAt').limit(1).first()
+      if (org) {
+        form.setFieldsValue({
+          orgName: org.get('orgName'),
+          orgCode: org.get('orgCode') ?? undefined,
+          orgType: org.get('orgType') ?? undefined,
+          legalPerson: org.get('legalPerson') ?? undefined,
+          phone: org.get('phone') ?? undefined,
+          email: org.get('email') ?? undefined,
+          address: org.get('address') ?? undefined,
+          establishDate: org.get('establishDate') ? dayjs(org.get('establishDate')) : undefined,
+          status: org.get('status'),
+          description: org.get('description') ?? undefined,
+        })
+      }
     } catch {
       // 无历史数据时静默忽略
     } finally {
@@ -55,8 +57,10 @@ export default function OrgPage() {
 
     setSubmitting(true)
     try {
-      const result = await Parse.Cloud.run('saveOrg', payload)
-      message.success(`保存成功，记录 ID：${result.id}`)
+      // 直连 /classes 保存（author 由服务端 beforeSave 自动填充）
+      const org = new Parse.Object('Org').set(payload)
+      await org.save()
+      message.success(`保存成功，记录 ID：${org.id}`)
     } catch (err) {
       message.error(`保存失败：${err.message}`)
     } finally {

@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import App from '@/App'
 
-// Mock Parse.User.current() 模拟登录状态
+// Mock Parse SDK：模拟登录状态，Query/Object 返回空数据
 vi.mock('@/lib/parse', () => {
   const mockUser = { get: (key) => (key === 'username' ? 'testuser' : null) }
   return {
@@ -10,7 +10,16 @@ vi.mock('@/lib/parse', () => {
       initialize: vi.fn(),
       serverURL: '/parse',
       User: { current: () => mockUser },
-      Cloud: { run: vi.fn() },
+      Query: vi.fn().mockImplementation(() => ({
+        descending: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        first: vi.fn().mockResolvedValue(null),
+      })),
+      Object: vi.fn().mockImplementation(() => ({
+        set: vi.fn().mockReturnThis(),
+        save: vi.fn().mockResolvedValue({}),
+      })),
+      File: vi.fn(),
     },
   }
 })
