@@ -125,13 +125,43 @@ export default function ProfilePage() {
         layout="vertical"
         onFinish={onFinish}
         initialValues={{
+          name: '小铭哥',
           gender: 'male',
-          education: [],
-          work: [],
-          skills: [],
-          projects: [],
-          interests: [],
-          socialLinks: [],
+          birthday: dayjs('2000-01-01'),
+          phone: '13800138000',
+          email: 'hi@xmg111.xyz',
+          address: '北京',
+          website: 'https://xmg111.xyz',
+          bio: '你好，我是小铭哥，一名热爱技术的开发者。',
+          skills: ['JavaScript', 'React', 'Node.js'],
+          interests: ['编程', '摄影'],
+          education: [
+            {
+              school: '示例大学',
+              major: '计算机科学与技术',
+              degree: '本科',
+              start: '2018',
+              end: '2022',
+            },
+          ],
+          work: [
+            {
+              company: '示例科技',
+              title: '前端工程师',
+              start: '2022',
+              end: '至今',
+              desc: '负责管理后台与博客开发',
+            },
+          ],
+          projects: [
+            {
+              name: '个人博客',
+              role: '独立开发',
+              time: '2024',
+              desc: '基于 React + Parse Server 的全栈项目',
+            },
+          ],
+          socialLinks: [{ platform: 'github', url: 'https://github.com/pemelosweet' }],
         }}
       >
         {/* 头像区 */}

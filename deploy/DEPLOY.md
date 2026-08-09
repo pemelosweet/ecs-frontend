@@ -13,8 +13,8 @@ xmg111.xyz ───────┬─ /            → /var/www/blog（博客�
 ## 1. 安装运行环境
 
 ```bash
-# Node.js 20 + pm2
-curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+# Node.js 24 + pm2（与开发机同大版本，保证 npm ci 通过；老版本 npm 对 lock 校验可能不一致）
+curl -fsSL https://rpm.nodesource.com/setup_24.x | bash -
 dnf install -y nodejs
 npm install -g pm2
 
@@ -81,20 +81,10 @@ docker stop form-frontend
 ls /etc/letsencrypt/live/admin.xmg111.xyz/ /etc/letsencrypt/live/xmg111.xyz/
 ```
 
-**情况 A：ECS 上没装宝塔** —— 装系统 nginx：
-
 ```bash
 dnf install -y nginx
 cp /opt/xmg/ecs-frontend/deploy/nginx-xmg.conf /etc/nginx/conf.d/xmg.conf
 nginx -t && systemctl enable --now nginx
-```
-
-**情况 B：ECS 上已装宝塔** —— 别装系统 nginx（会和宝塔的抢端口），把配置放进宝塔 nginx 的站点目录：
-
-```bash
-cp /opt/xmg/ecs-frontend/deploy/nginx-xmg.conf /www/server/panel/vhost/nginx/xmg.conf
-# 宝塔面板里删掉之前手动建的 admin/xmg 两个站点（避免配置重复），或确认站点配置不冲突
-nginx -t && /etc/init.d/nginx reload
 ```
 
 ## 5. 验证
@@ -113,4 +103,4 @@ curl -k https://127.0.0.1/ -H "Host: xmg111.xyz"                     # 博客 HT
 1. 生产 MongoDB 是空库，注册新账号后重填档案即可
 2. 安全组只开 80 / 443，1337、27017 不对公网开放
 3. 证书续期：certbot renew 后 `nginx -s reload`
-4. 更新代码：`git pull` 后后端 `pm2 restart parse-server`，前端重新 build 覆盖 /var/www
+4. 更新代码：服务器上执行 `bash /opt/xmg/ecs-frontend/deploy/update.sh`，一键完成拉代码、构建、同步产物、重启后端
