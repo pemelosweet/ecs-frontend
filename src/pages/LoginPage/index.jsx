@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Card, Form, Input, Button, Typography, message } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import Parse from '@/lib/parse'
+import { zhError } from '@/lib/errorMsg'
 
 const { Title } = Typography
 
@@ -17,7 +18,7 @@ export default function LoginPage() {
       message.success('登录成功')
       navigate('/home', { replace: true })
     } catch (err) {
-      message.error(err.message || '登录失败')
+      message.error(zhError(err, '登录失败'))
     } finally {
       setLoading(false)
     }

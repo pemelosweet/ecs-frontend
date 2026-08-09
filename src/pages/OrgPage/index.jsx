@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Card, Form, Input, Select, DatePicker, Switch, Button, Space, message } from 'antd'
 import dayjs from 'dayjs'
 import Parse from '@/lib/parse'
+import { zhError } from '@/lib/errorMsg'
 
 const { TextArea } = Input
 
@@ -62,7 +63,7 @@ export default function OrgPage() {
       await org.save()
       message.success(`保存成功，记录 ID：${org.id}`)
     } catch (err) {
-      message.error(`保存失败：${err.message}`)
+      message.error(`保存失败：${zhError(err)}`)
     } finally {
       setSubmitting(false)
     }

@@ -4,6 +4,7 @@ import { Card, Form, Input, Radio, DatePicker, Select, Button, Space, message, U
 import { PlusOutlined, MinusCircleOutlined, UserOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import Parse from '@/lib/parse'
+import { zhError } from '@/lib/errorMsg'
 
 const { TextArea } = Input
 
@@ -121,7 +122,7 @@ export default function ProfilePage() {
       )
       setAvatarFile(null)
     } catch (err) {
-      message.error(`保存失败：${err.message}`)
+      message.error(`保存失败：${zhError(err)}`)
     } finally {
       setSubmitting(false)
     }
