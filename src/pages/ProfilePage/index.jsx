@@ -225,9 +225,11 @@ export default function ProfilePage() {
           <Form.Item name="address" label="地址">
             <Input placeholder="所在城市" />
           </Form.Item>
+          {/* 个人网站字段暂时隐藏
           <Form.Item name="website" label="个人网站">
             <Input placeholder="https://..." />
           </Form.Item>
+          */}
           <Form.Item name="bio" label="自我介绍">
             <TextArea rows={3} placeholder="一句话介绍自己" />
           </Form.Item>
