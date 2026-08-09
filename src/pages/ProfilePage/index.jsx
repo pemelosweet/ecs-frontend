@@ -17,6 +17,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [avatarFile, setAvatarFile] = useState(null) // 待上传的新文件
   const [avatarPreview, setAvatarPreview] = useState(null) // 当前显示的头像 URL
+  const [profileId, setProfileId] = useState(null) // 已有档案的 id，存在则更新同一条
 
   // 回填最新档案
 
@@ -24,6 +25,7 @@ export default function ProfilePage() {
     try {
       const profile = await new Parse.Query('Profile').descending('createdAt').limit(1).first()
       if (profile) {
+        setProfileId(profile.id)
         const data = profile.attributes
         form.setFieldsValue({
           name: data.name,
@@ -107,9 +109,16 @@ export default function ProfilePage() {
       }
 
       // 直连 /classes 保存（author 由服务端 beforeSave 自动填充）
-      const profile = new Parse.Object('Profile').set(payload)
+      // id 存在 → 更新同一条档案；不存在 → 新建
+      const isUpdate = !!profileId
+      const profile = new Parse.Object('Profile')
+      if (isUpdate) profile.id = profileId
+      profile.set(payload)
       await profile.save()
-      message.success(`档案已保存（ID：${profile.id}）`)
+      if (!isUpdate) setProfileId(profile.id)
+      message.success(
+        isUpdate ? `档案已更新（ID：${profile.id}）` : `档案已创建（ID：${profile.id}）`
+      )
       setAvatarFile(null)
     } catch (err) {
       message.error(`保存失败：${err.message}`)
