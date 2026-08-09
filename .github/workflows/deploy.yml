@@ -1,0 +1,20 @@
+# 生产自动部署：push 后由 ECS 自托管 runner 执行一键更新
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  # 其他仓库 push 后通过 repository_dispatch 触发本 workflow
+  repository_dispatch:
+    types: [deploy]
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: 执行一键更新
+        run: bash /opt/xmg/ecs-frontend/deploy/update.sh
