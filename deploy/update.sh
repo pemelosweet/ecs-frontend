@@ -21,6 +21,8 @@ npm run build
 mkdir -p /var/www/blog && cp -r public/* /var/www/blog/
 
 echo "==> 重启后端"
+cd /opt/xmg/ecs-test-servers
+npm install --no-audit --no-fund --silent
 pm2 restart parse-server
 
 echo "==> 更新完成"
