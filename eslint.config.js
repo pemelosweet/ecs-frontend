@@ -16,6 +16,8 @@ export default [
       'playwright-report/',
       '.worktrees/',
       '.qoder/',
+      // 第三方 vendor 文件（如阿里云图形认证 SDK ct4.js，控制台下载原样自托管）
+      'public/',
     ],
   },
 
