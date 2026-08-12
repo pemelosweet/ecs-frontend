@@ -46,12 +46,13 @@ cp .env.example .env && vi .env
 `.env` 生产值（与本地的差异见注释）：
 
 ```bash
-PARSE_APP_ID=com.xmg.admin                          # 必须与前端代码一致
+PARSE_APP_ID=xmg                          # 必须与前端代码一致
 PARSE_MASTER_KEY=<openssl rand -hex 32 新生成>       # 建议生产单独一个
 PARSE_SERVER_URL=http://127.0.0.1:1337/parse        # 内部寻址用本机回环
 DATABASE_URI=mongodb://127.0.0.1:27017/ecs
 PUBLIC_SERVER_URL=https://admin.xmg111.xyz/parse    # 对外地址必须是域名
-OSS_*                                               # 四项照抄本地 .env
+OSS_*                                               # 照抄本地 .env；生产另加 OSS_PUBLIC_URL=https://img.xmg111.xyz
+# OSS_DIRECT_ACCESS=false                            # 默认走 Parse /files 代理预览；绑自定义域名后设 true 直连
 PARSE_DASHBOARD_PASSWORD=<强密码>                    # 看板默认 admin/admin123 必须换
 ```
 
@@ -92,7 +93,7 @@ nginx -t && systemctl enable --now nginx
 ```bash
 curl -k https://127.0.0.1/ -H "Host: admin.xmg111.xyz"               # 管理后台 HTML
 curl -k "https://127.0.0.1/parse/classes/Profile?limit=1" \
-     -H "Host: admin.xmg111.xyz" -H "X-Parse-Application-Id: com.xmg.admin"
+     -H "Host: admin.xmg111.xyz" -H "X-Parse-Application-Id: xmg"
 curl -k https://127.0.0.1/ -H "Host: xmg111.xyz"                     # 博客 HTML
 ```
 

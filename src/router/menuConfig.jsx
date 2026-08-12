@@ -1,4 +1,4 @@
-import { HomeOutlined, BankOutlined, IdcardOutlined } from '@ant-design/icons'
+import { HomeOutlined, BankOutlined, IdcardOutlined, PictureOutlined } from '@ant-design/icons'
 
 // 菜单 / 路由配置，集中管理，便于生成侧边栏菜单与面包屑
 export const menuConfig = [
@@ -16,6 +16,11 @@ export const menuConfig = [
     key: '/profile',
     label: '个人档案',
     icon: <IdcardOutlined />,
+  },
+  {
+    key: '/images',
+    label: '图床',
+    icon: <PictureOutlined />,
   },
 ]
 

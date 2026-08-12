@@ -3,6 +3,7 @@ import MainLayout from '@/layouts/MainLayout'
 import HomePage from '@/pages/HomePage'
 import OrgPage from '@/pages/OrgPage'
 import ProfilePage from '@/pages/ProfilePage'
+import ImageHostPage from '@/pages/ImageHostPage'
 import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 import NotFound from '@/pages/NotFound'
@@ -26,6 +27,7 @@ export const routes = [
       { path: 'home', element: <HomePage /> },
       { path: 'org', element: <OrgPage /> },
       { path: 'profile', element: <ProfilePage /> },
+      { path: 'images', element: <ImageHostPage /> },
     ],
   },
   { path: '*', element: <NotFound /> },
