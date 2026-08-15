@@ -4,6 +4,7 @@ import { Card, Form, Input, Button, Typography, message } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import Parse from '@/lib/parse'
 import { zhError } from '@/lib/errorMsg'
+import { clearMenuCache } from '@/lib/permissions'
 import ForgotPasswordModal from './ForgotPasswordModal'
 
 const { Title } = Typography
@@ -17,6 +18,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await Parse.User.logIn(values.username, values.password)
+      clearMenuCache() // 切换账号后强制重新拉取权限
       message.success('登录成功')
       navigate('/home', { replace: true })
     } catch (err) {

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu, Breadcrumb, Button, Avatar, theme, Dropdown, message } from 'antd'
+import { Layout, Menu, Breadcrumb, Button, Avatar, theme, Dropdown, message, Tag, Spin } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -8,12 +8,14 @@ import {
   LogoutOutlined,
 } from '@ant-design/icons'
 import { menuConfig, findMenuByPath } from '@/router/menuConfig'
+import { loadMenuPermissions, clearMenuCache, isAdmin } from '@/lib/permissions'
 import Parse from '@/lib/parse'
 
 const { Header, Sider, Content } = Layout
 
 export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [menus, setMenus] = useState(null) // null = 权限加载中
   const navigate = useNavigate()
   const location = useLocation()
   const {
@@ -23,8 +25,20 @@ export default function MainLayout() {
   const current = findMenuByPath(location.pathname)
   const currentUser = Parse.User.current()
 
+  // 加载当前用户可访问菜单（带缓存，后端不可用时回退角色默认）
+  useEffect(() => {
+    let mounted = true
+    loadMenuPermissions().then((allowed) => {
+      if (mounted) setMenus(allowed)
+    })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   const handleLogout = async () => {
     await Parse.User.logOut()
+    clearMenuCache()
     message.success('已登出')
     navigate('/login', { replace: true })
   }
@@ -37,6 +51,9 @@ export default function MainLayout() {
       onClick: handleLogout,
     },
   ]
+
+  // 按权限过滤侧边菜单
+  const allowedMenus = menus ? menuConfig.filter((m) => menus.includes(m.key)) : []
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -68,7 +85,7 @@ export default function MainLayout() {
         <Menu
           mode="inline"
           selectedKeys={[location.pathname]}
-          items={menuConfig}
+          items={menus ? allowedMenus : []}
           onClick={({ key }) => navigate(key)}
           style={{ borderInlineEnd: 'none' }}
         />
@@ -104,6 +121,13 @@ export default function MainLayout() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <Avatar size={28} icon={<UserOutlined />} />
                 <span>{currentUser?.get('username') || '用户'}</span>
+                {isAdmin(currentUser) ? (
+                  <Tag color="blue" style={{ marginInlineEnd: 0 }}>
+                    管理员
+                  </Tag>
+                ) : (
+                  <Tag style={{ marginInlineEnd: 0 }}>普通用户</Tag>
+                )}
               </div>
             </Dropdown>
           </div>
@@ -113,7 +137,13 @@ export default function MainLayout() {
             style={{ marginBottom: 16 }}
             items={[{ title: '首页' }, { title: current?.label || '未知页面' }]}
           />
-          <Outlet />
+          {menus ? (
+            <Outlet />
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
+              <Spin size="large" />
+            </div>
+          )}
         </Content>
       </Layout>
     </Layout>
