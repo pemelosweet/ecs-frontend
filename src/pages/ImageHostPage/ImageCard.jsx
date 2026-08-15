@@ -1,4 +1,4 @@
-import { Card, Popconfirm, Button, Typography, message } from 'antd'
+import { Card, Popconfirm, Button, Typography, message, Image } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 import { CHECKER_BG, formatSize, formatMime, formatDate, formatDimensions } from '@/lib/imageMeta'
 
@@ -7,7 +7,16 @@ const { Text } = Typography
 export const CARD_W = 250
 const CARD_H = 322
 const COVER_H = 150
-const LINK_COLOR = '#1677ff'
+
+// 图片加载失败占位（内联 SVG data URI，不依赖外部资源）
+const FALLBACK_IMG =
+  'data:image/svg+xml;charset=utf-8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="250" height="150">' +
+      '<rect width="100%" height="100%" fill="#f5f5f5"/>' +
+      '<text x="50%" y="50%" fill="#bfbfbf" font-size="14" text-anchor="middle" dominant-baseline="middle">图片加载失败</text>' +
+      '</svg>'
+  )
 
 const copyText = async (text, label) => {
   try {
@@ -32,21 +41,21 @@ export default function ImageCard({ item, onDelete }) {
       styles={{ body: { padding: '12px 16px', flex: 1 } }}
       cover={
         <div style={{ position: 'relative', ...CHECKER_BG }}>
-          <img
+          <Image
             src={item.url}
             alt={name}
-            style={{
-              height: COVER_H,
-              width: '100%',
-              objectFit: 'contain',
-              display: 'block',
-            }}
+            height={COVER_H}
+            width="100%"
+            style={{ objectFit: 'contain', display: 'block' }}
+            fallback={FALLBACK_IMG}
+            preview={{ mask: '点击预览' }}
           />
           <Popconfirm title="确认删除这张图片？" onConfirm={() => onDelete(item)}>
             <Button
               size="small"
               type="text"
               danger
+              aria-label={`删除图片 ${name}`}
               icon={<DeleteOutlined />}
               style={{
                 position: 'absolute',
@@ -59,23 +68,25 @@ export default function ImageCard({ item, onDelete }) {
         </div>
       }
       actions={[
-        <a key="url" style={{ color: LINK_COLOR }} onClick={() => copyText(item.url, '链接')}>
+        <Button key="url" type="link" size="small" onClick={() => copyText(item.url, '链接')}>
           原始URL
-        </a>,
-        <a
+        </Button>,
+        <Button
           key="md"
-          style={{ color: LINK_COLOR }}
+          type="link"
+          size="small"
           onClick={() => copyText(`![${name}](${item.url})`, 'Markdown')}
         >
           Markdown
-        </a>,
-        <a
+        </Button>,
+        <Button
           key="html"
-          style={{ color: LINK_COLOR }}
+          type="link"
+          size="small"
           onClick={() => copyText(`<img src="${item.url}" alt="${name}" />`, 'HTML')}
         >
           HTML
-        </a>,
+        </Button>,
       ]}
     >
       <Text ellipsis style={{ display: 'block', fontSize: 16, marginBottom: 4 }}>

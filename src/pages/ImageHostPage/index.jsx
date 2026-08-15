@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Card,
   Upload,
@@ -10,37 +10,35 @@ import {
   DatePicker,
   Space,
   message,
+  Tag,
 } from 'antd'
 import { InboxOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import Parse from '@/lib/parse'
 import { zhError } from '@/lib/errorMsg'
+import {
+  ALLOWED_TYPES,
+  MAX_RAW_SIZE_MB,
+  MAX_RAW_SIZE_BYTES,
+  compressImage,
+  readImageSize,
+} from '@/lib/imageCompress'
 import ImageCard, { CARD_W } from './ImageCard'
 
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-const MAX_SIZE_MB = 10
-const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
 const PAGE_SIZE = 12
 
-// 本地读取图片宽高（登记时随传，展示用）；读取失败不阻断上传
-const readImageSize = (file) =>
-  new Promise((resolve) => {
-    const url = URL.createObjectURL(file)
-    const img = new Image()
-    img.onload = () => {
-      const meta = { width: img.naturalWidth, height: img.naturalHeight }
-      URL.revokeObjectURL(url)
-      resolve(meta)
-    }
-    img.onerror = () => {
-      URL.revokeObjectURL(url)
-      resolve({})
-    }
-    img.src = url
-  })
+// 组装列表查询参数（纯函数）
+const buildParams = (p, f) => {
+  const params = { limit: PAGE_SIZE, skip: (p - 1) * PAGE_SIZE }
+  if (f.name) params.name = f.name
+  if (f.start) params.startDate = f.start
+  if (f.end) params.endDate = f.end
+  return params
+}
 
 export default function ImageHostPage() {
   const [images, setImages] = useState([])
   const [total, setTotal] = useState(0)
+  const [quota, setQuota] = useState(null) // { used, limit }
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -48,41 +46,39 @@ export default function ImageHostPage() {
   const [nameInput, setNameInput] = useState('') // 搜索框输入（未应用）
   const [dateRange, setDateRange] = useState(null) // 日期范围选择（未应用）
   const [filters, setFilters] = useState({}) // 已应用的搜索条件 { name, start, end }
+  const uploadingRef = useRef(false) // 上传锁：防拖拽多文件并发
 
-  // 组装列表查询参数（分页 + 搜索条件）
-  const buildParams = (p, f) => {
-    const params = { limit: PAGE_SIZE, skip: (p - 1) * PAGE_SIZE }
-    if (f.name) params.name = f.name
-    if (f.start) params.startDate = f.start
-    if (f.end) params.endDate = f.end
-    return params
-  }
+  const hasSearch = Boolean(filters.name || filters.start || filters.end)
 
-  const loadImages = async (p, f = filters) => {
-    setLoading(true)
+  // 数据加载（单一入口，DRY；调用方负责 loading 反馈）
+  const loadImages = useCallback(async (p, f) => {
     try {
       const res = await Parse.Cloud.run('imageHostList', buildParams(p, f))
       setImages(res.results || [])
       setTotal(res.total || 0)
+      setQuota(res.quota || null)
     } catch (err) {
       message.error(`加载图床失败：${zhError(err)}`)
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
+  // 挂载 + page/filters 变化时拉取
   useEffect(() => {
-    // setState 都在异步回调里，不触碰同步 setState 规则
-    Parse.Cloud.run('imageHostList', buildParams(page, filters))
-      .then((res) => {
-        setImages(res.results || [])
-        setTotal(res.total || 0)
-      })
-      .catch((err) => message.error(`加载图床失败：${zhError(err)}`))
-      .finally(() => setLoading(false))
+    let cancelled = false
+    ;(async () => {
+      await Promise.resolve() // 异步化，避免 effect 内同步 setState
+      if (cancelled) return
+      await loadImages(page, filters)
+    })()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filters])
 
-  // 搜索：应用条件并回第一页（filters 新对象触发 effect 重拉）
+  // 搜索：应用条件并回第一页
   const doSearch = () => {
     setLoading(true)
     setPage(1)
@@ -128,22 +124,39 @@ export default function ImageHostPage() {
       xhr.send(form)
     })
 
+  // 上传流程：快速校验 → 前端压缩 → 服务端票据（压缩后类型）→ 直传 OSS → 登记
   const beforeUpload = async (file) => {
     if (!ALLOWED_TYPES.has(file.type)) {
       message.error('仅支持 JPG / PNG / WebP / GIF')
       return Upload.LIST_IGNORE
     }
-    if (file.size > MAX_SIZE_BYTES) {
-      message.error(`${file.name} 超过 ${MAX_SIZE_MB}MB`)
+    if (file.size > MAX_RAW_SIZE_BYTES) {
+      message.error(`${file.name} 超过 ${MAX_RAW_SIZE_MB}MB，无法处理`)
+      return Upload.LIST_IGNORE
+    }
+    if (uploadingRef.current) {
+      message.warning('已有图片在上传中，请稍候')
       return Upload.LIST_IGNORE
     }
 
+    uploadingRef.current = true
     setUploading(true)
     setProgress(0)
     try {
-      const ticket = await Parse.Cloud.run('imageHostUploadTicket', { contentType: file.type })
-      await postFileToOss(ticket, file)
-      const sizeMeta = await readImageSize(file)
+      // 1. 前端压缩（GIF 原样；异常回退原文件）
+      const { file: payload } = await compressImage(file)
+      // 2. 申请票据（用压缩后的类型；配额/类型由服务端把关）
+      const ticket = await Parse.Cloud.run('imageHostUploadTicket', {
+        contentType: payload.type,
+      })
+      if (payload.size > ticket.maxSize) {
+        message.error(`${file.name} 压缩后仍超过 ${Math.round(ticket.maxSize / 1024 / 1024)}MB`)
+        return Upload.LIST_IGNORE
+      }
+      // 3. 直传 OSS
+      await postFileToOss(ticket, payload)
+      // 4. 读压缩后尺寸 + 登记（name 保留原始文件名）
+      const sizeMeta = await readImageSize(payload)
       await Parse.Cloud.run('imageHostRegister', {
         key: ticket.key,
         token: ticket.token,
@@ -151,11 +164,13 @@ export default function ImageHostPage() {
         ...sizeMeta,
       })
       message.success('上传成功')
-      if (page === 1) await loadImages(1)
+      setProgress(100)
+      if (page === 1) await loadImages(1, filters)
       else setPage(1) // 新图在最前，跳回第一页可见
     } catch (err) {
       message.error(`上传失败：${zhError(err)}`)
     } finally {
+      uploadingRef.current = false
       setUploading(false)
     }
     return Upload.LIST_IGNORE
@@ -167,18 +182,29 @@ export default function ImageHostPage() {
       message.success('已删除')
       if (images.length === 1 && page > 1)
         setPage(page - 1) // 本页删空则回上一页
-      else await loadImages(page)
+      else await loadImages(page, filters)
     } catch (err) {
       message.error(`删除失败：${zhError(err)}`)
     }
   }
 
   return (
-    <Card title={`图床（共 ${total} 张）`} loading={loading}>
+    <Card
+      title={`图床（共 ${total} 张）`}
+      extra={
+        quota ? (
+          <Tag color={quota.used >= quota.limit ? 'red' : 'blue'}>
+            今日已上传 {quota.used}/{quota.limit} 张
+          </Tag>
+        ) : null
+      }
+      loading={loading}
+    >
       <Upload.Dragger
         accept=".jpg,.jpeg,.png,.webp,.gif"
         showUploadList={false}
         multiple={false}
+        maxCount={1}
         disabled={uploading}
         beforeUpload={beforeUpload}
         style={{ marginBottom: 24 }}
@@ -187,7 +213,11 @@ export default function ImageHostPage() {
           <InboxOutlined />
         </p>
         <p className="ant-upload-text">点击或拖拽图片到此处</p>
-        <p className="ant-upload-hint">JPG / PNG / WebP / GIF，不超过 {MAX_SIZE_MB}MB</p>
+        <p className="ant-upload-hint">
+          {uploading
+            ? '正在上传，请稍候…'
+            : 'JPG / PNG / WebP / GIF，上传前自动压缩（最长边 2048px，GIF 动画原样）'}
+        </p>
       </Upload.Dragger>
 
       {uploading && <Progress percent={progress} style={{ marginBottom: 24 }} />}
@@ -212,7 +242,7 @@ export default function ImageHostPage() {
       </Space>
 
       {images.length === 0 ? (
-        <Empty description="还没有图片，上传第一张试试" />
+        <Empty description={hasSearch ? '未找到匹配的图片' : '还没有图片，上传第一张试试'} />
       ) : (
         <>
           <div
