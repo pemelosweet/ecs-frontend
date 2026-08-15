@@ -4,11 +4,13 @@ import { Card, Form, Input, Button, Typography, message } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import Parse from '@/lib/parse'
 import { zhError } from '@/lib/errorMsg'
+import ForgotPasswordModal from './ForgotPasswordModal'
 
 const { Title } = Typography
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
+  const [forgotOpen, setForgotOpen] = useState(false)
   const navigate = useNavigate()
 
   const onFinish = async (values) => {
@@ -50,11 +52,15 @@ export default function LoginPage() {
               登录
             </Button>
           </Form.Item>
-          <div style={{ textAlign: 'center' }}>
-            还没有账号？<Link to="/register">立即注册</Link>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <a onClick={() => setForgotOpen(true)}>忘记密码？</a>
+            <span>
+              还没有账号？<Link to="/register">立即注册</Link>
+            </span>
           </div>
         </Form>
       </Card>
+      <ForgotPasswordModal open={forgotOpen} onClose={() => setForgotOpen(false)} />
     </div>
   )
 }
