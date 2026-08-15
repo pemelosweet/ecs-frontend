@@ -23,5 +23,5 @@ jobs:
         run: |
           if [ -z "$PROD_ENV" ]; then echo "缺少 PROD_ENV secret，终止"; exit 1; fi
           printf '%s\n' "$PROD_ENV" > /opt/xmg/ecs-test-servers/.env
-      - name: 执行一键更新
-        run: bash /opt/xmg/ecs-frontend/deploy/update.sh
+      - name: 执行一键更新（基础设施仓库 update.sh 自更新）
+        run: bash /opt/xmg/ecs-infra/scripts/update.sh
