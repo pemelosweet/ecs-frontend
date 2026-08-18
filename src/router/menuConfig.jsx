@@ -3,6 +3,7 @@ import {
   BankOutlined,
   IdcardOutlined,
   PictureOutlined,
+  BookOutlined,
   TeamOutlined,
   SafetyCertificateOutlined,
 } from '@ant-design/icons'
@@ -29,6 +30,11 @@ export const menuConfig = [
     key: '/images',
     label: '图床',
     icon: <PictureOutlined />,
+  },
+  {
+    key: '/knowledge',
+    label: '知识库',
+    icon: <BookOutlined />,
   },
   {
     key: '/users',

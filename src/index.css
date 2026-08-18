@@ -20,3 +20,121 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* ===== AI 问答：打字动画 ===== */
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+}
+.typing-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+  animation: typing-bounce 1.2s infinite ease-in-out;
+}
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes typing-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+/* ===== AI 问答：Markdown 内容样式 ===== */
+.md-content > *:first-child {
+  margin-top: 0;
+}
+.md-content > *:last-child {
+  margin-bottom: 0;
+}
+.md-content h1,
+.md-content h2,
+.md-content h3,
+.md-content h4 {
+  margin: 14px 0 8px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.md-content h1 {
+  font-size: 18px;
+}
+.md-content h2 {
+  font-size: 16px;
+}
+.md-content h3,
+.md-content h4 {
+  font-size: 15px;
+}
+.md-content p {
+  margin: 6px 0;
+}
+.md-content ul,
+.md-content ol {
+  margin: 6px 0;
+  padding-left: 22px;
+}
+.md-content li {
+  margin: 3px 0;
+}
+.md-content code {
+  background: #eef2ff;
+  color: #2f54eb;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+.md-content pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+.md-content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: 13px;
+}
+.md-content blockquote {
+  margin: 8px 0;
+  padding: 6px 14px;
+  border-left: 3px solid #2f54eb;
+  background: #f8fafc;
+  color: #475569;
+  border-radius: 0 8px 8px 0;
+}
+.md-content table {
+  border-collapse: collapse;
+  margin: 10px 0;
+  width: 100%;
+}
+.md-content th,
+.md-content td {
+  border: 1px solid #e5e9f0;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.md-content th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+.md-content a {
+  color: #2f54eb;
+}
