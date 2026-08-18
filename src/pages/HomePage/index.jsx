@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Input, Button, Avatar, Tag, Tooltip } from 'antd'
+import { Input, Button, Avatar, Tag, Tooltip, Modal } from 'antd'
 import {
   RobotOutlined,
   SendOutlined,
@@ -29,10 +29,24 @@ const AssistantAvatar = () => (
   />
 )
 
+// 参考来源按文档去重：同文档多块合并为「标题 ×n」，点击标签弹窗查看各召回块
+const groupSources = (sources) => {
+  const map = new Map()
+  for (const s of sources || []) {
+    const title = s.title || '未命名文档'
+    if (!map.has(title)) map.set(title, { title, count: 0, contents: [] })
+    const g = map.get(title)
+    g.count += 1
+    if (s.content) g.contents.push(s.content)
+  }
+  return [...map.values()]
+}
+
 export default function HomePage() {
   const [messages, setMessages] = useState([]) // { id, role: 'user'|'assistant', content, sources?, error? }
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [sourcesModal, setSourcesModal] = useState(null) // { title, chunks: [{ path, body }] }
   const listRef = useRef(null)
 
   // 消息/加载态变化时滚动到底部（jsdom 测试环境无 scrollTo，用可选调用兜底）
@@ -252,26 +266,38 @@ export default function HomePage() {
                           参考来源
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                          {msg.sources.map((s, i) => (
-                            <Tooltip key={i} title={s.content || s.title}>
-                              <Tag
-                                icon={<FileTextOutlined />}
-                                color="blue"
-                                style={{ marginInlineEnd: 0, cursor: 'default', maxWidth: 260 }}
+                          {groupSources(msg.sources).map((g) => (
+                            <Tag
+                              key={g.title}
+                              icon={<FileTextOutlined />}
+                              color="blue"
+                              style={{ marginInlineEnd: 0, cursor: 'pointer', maxWidth: 260 }}
+                              onClick={() =>
+                                setSourcesModal({
+                                  title: g.title,
+                                  chunks: g.contents.map((c) => {
+                                    // 切块首行是标题路径（切块时附加），拆开展示更清晰
+                                    const idx = c.indexOf('\n')
+                                    return idx > -1
+                                      ? { path: c.slice(0, idx), body: c.slice(idx + 1) }
+                                      : { path: '', body: c }
+                                  }),
+                                })
+                              }
+                            >
+                              <span
+                                style={{
+                                  maxWidth: 200,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  display: 'inline-block',
+                                  verticalAlign: 'bottom',
+                                }}
                               >
-                                <span
-                                  style={{
-                                    maxWidth: 200,
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    display: 'inline-block',
-                                    verticalAlign: 'bottom',
-                                  }}
-                                >
-                                  {s.title || `来源 ${i + 1}`}
-                                </span>
-                              </Tag>
-                            </Tooltip>
+                                {g.title}
+                                {g.count > 1 ? ` ×${g.count}` : ''}
+                              </span>
+                            </Tag>
                           ))}
                         </div>
                       </div>
@@ -335,6 +361,35 @@ export default function HomePage() {
           <BulbOutlined /> 内容由 AI 生成，请结合引用来源核对
         </div>
       </div>
+
+      {/* 引用来源详情：点击标签查看该文档各召回块（标题路径 + Markdown 正文） */}
+      <Modal
+        title={`引用来源：${sourcesModal?.title || ''}（${sourcesModal?.chunks.length || 0} 块）`}
+        open={!!sourcesModal}
+        onCancel={() => setSourcesModal(null)}
+        footer={null}
+        width={640}
+      >
+        {sourcesModal?.chunks.map((c, i) => (
+          <div
+            key={i}
+            style={{
+              marginBottom: 16,
+              padding: 12,
+              background: '#f8fafc',
+              borderRadius: 8,
+              border: '1px solid #eef1f6',
+            }}
+          >
+            {c.path && (
+              <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>{c.path}</div>
+            )}
+            <div className="md-content" style={{ fontSize: 13, lineHeight: 1.7 }}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{c.body}</ReactMarkdown>
+            </div>
+          </div>
+        ))}
+      </Modal>
     </div>
   )
 }

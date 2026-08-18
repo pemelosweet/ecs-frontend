@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Card, Upload, Table, Tag, Button, Popconfirm, Empty, message } from 'antd'
-import { InboxOutlined, DeleteOutlined } from '@ant-design/icons'
+import { Card, Upload, Table, Tag, Button, Popconfirm, Empty, Drawer, message } from 'antd'
+import { InboxOutlined, DeleteOutlined, DownloadOutlined, ProfileOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import Parse from '@/lib/parse'
 import { zhError } from '@/lib/errorMsg'
@@ -27,6 +27,9 @@ export default function KnowledgeBasePage() {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [page, setPage] = useState(1)
+  const [chunksDoc, setChunksDoc] = useState(null) // 当前查看切块的文档
+  const [chunksList, setChunksList] = useState([])
+  const [chunksLoading, setChunksLoading] = useState(false)
 
   const loadList = useCallback(async (p) => {
     setLoading(true)
@@ -88,6 +91,20 @@ export default function KnowledgeBasePage() {
     }
   }
 
+  const handleViewChunks = async (record) => {
+    setChunksDoc(record)
+    setChunksList([])
+    setChunksLoading(true)
+    try {
+      const res = await Parse.Cloud.run('knowledgeChunks', { id: record.id })
+      setChunksList(res.list || [])
+    } catch (err) {
+      message.error(zhError(err, '加载切块失败'))
+    } finally {
+      setChunksLoading(false)
+    }
+  }
+
   const columns = [
     {
       title: '标题',
@@ -128,20 +145,42 @@ export default function KnowledgeBasePage() {
     {
       title: '操作',
       key: 'action',
-      width: 90,
+      width: 210,
       render: (_, record) => (
-        <Popconfirm
-          title="确认删除该文档？"
-          description="删除后其所有切块一并移除，不可恢复"
-          okText="删除"
-          okButtonProps={{ danger: true }}
-          cancelText="取消"
-          onConfirm={() => handleDelete(record)}
-        >
-          <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-            删除
+        <>
+          <Button
+            type="link"
+            size="small"
+            icon={<ProfileOutlined />}
+            onClick={() => handleViewChunks(record)}
+          >
+            切块
           </Button>
-        </Popconfirm>
+          {/* 早期入库的文档未存原始文件引用，无下载入口 */}
+          {record.fileUrl && (
+            <Button
+              type="link"
+              size="small"
+              icon={<DownloadOutlined />}
+              href={record.fileUrl}
+              download={record.fileName || record.title}
+            >
+              下载
+            </Button>
+          )}
+          <Popconfirm
+            title="确认删除该文档？"
+            description="删除后其所有切块一并移除，不可恢复"
+            okText="删除"
+            okButtonProps={{ danger: true }}
+            cancelText="取消"
+            onConfirm={() => handleDelete(record)}
+          >
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+              删除
+            </Button>
+          </Popconfirm>
+        </>
       ),
     },
   ]
@@ -187,6 +226,46 @@ export default function KnowledgeBasePage() {
           }}
         />
       )}
+
+      {/* 切块查看抽屉：验证切块质量 / 排查召回问题 */}
+      <Drawer
+        title={`切块预览：${chunksDoc?.title || ''}（共 ${chunksList.length} 块）`}
+        open={!!chunksDoc}
+        onClose={() => setChunksDoc(null)}
+        width={560}
+      >
+        {chunksLoading ? (
+          <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>加载中…</div>
+        ) : (
+          chunksList.map((c) => (
+            <div
+              key={c.id}
+              style={{
+                marginBottom: 16,
+                padding: 12,
+                background: '#f8fafc',
+                borderRadius: 8,
+                border: '1px solid #eef1f6',
+              }}
+            >
+              <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 6 }}>
+                块 {c.chunkIndex + 1} ｜ {c.content.length} 字 ｜ 约 {c.tokenCount} token
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.7,
+                  color: '#1e293b',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {c.content}
+              </div>
+            </div>
+          ))
+        )}
+      </Drawer>
     </Card>
   )
 }
