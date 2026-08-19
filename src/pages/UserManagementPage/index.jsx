@@ -14,9 +14,10 @@ import {
 } from 'antd'
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import Parse from '@/lib/parse'
+import { cloud } from '@/lib/request'
 import { zhError } from '@/lib/errorMsg'
 import { getCurrentUser, ROLE_ADMIN } from '@/lib/permissions'
+import styles from './index.module.less'
 
 const { Option } = Select
 
@@ -41,7 +42,7 @@ export default function UserManagementPage() {
       const values = form.getFieldsValue()
       setLoading(true)
       try {
-        const res = await Parse.Cloud.run('adminUserList', {
+        const res = await cloud('adminUserList', {
           page: nextPage,
           pageSize: nextPageSize,
           username: values.username?.trim() || undefined,
@@ -89,7 +90,7 @@ export default function UserManagementPage() {
     const nextStatus = record.status === 'disabled' ? 'active' : 'disabled'
     setOperatingId(record.id)
     try {
-      await Parse.Cloud.run('adminSetUserStatus', {
+      await cloud('adminSetUserStatus', {
         userId: record.id,
         status: nextStatus,
       })
@@ -110,7 +111,7 @@ export default function UserManagementPage() {
   const handleDelete = async (record) => {
     setOperatingId(record.id)
     try {
-      await Parse.Cloud.run('adminDeleteUser', { userId: record.id })
+      await cloud('adminDeleteUser', { userId: record.id })
       message.success(`已删除用户「${record.username}」`)
       // 删除后当前页可能为空，回退一页
       const nextPage = list.length === 1 && page > 1 ? page - 1 : page
@@ -230,18 +231,18 @@ export default function UserManagementPage() {
   return (
     <Card title="用户管理">
       {/* 搜索区：用户名称 / 类型（角色）/ 状态 */}
-      <Form form={form} layout="inline" style={{ marginBottom: 16, rowGap: 12 }}>
+      <Form form={form} layout="inline" className={styles.filterForm}>
         <Form.Item name="username" label="用户名称">
-          <Input placeholder="请输入用户名称" allowClear style={{ width: 200 }} />
+          <Input placeholder="请输入 用户名称" allowClear className={styles.nameInput} />
         </Form.Item>
         <Form.Item name="role" label="类型">
-          <Select placeholder="全部" allowClear style={{ width: 140 }}>
+          <Select placeholder="全部" allowClear className={styles.filterSelect}>
             <Option value={ROLE_ADMIN}>管理员</Option>
             <Option value="user">普通用户</Option>
           </Select>
         </Form.Item>
         <Form.Item name="status" label="状态">
-          <Select placeholder="全部" allowClear style={{ width: 140 }}>
+          <Select placeholder="全部" allowClear className={styles.filterSelect}>
             <Option value="active">正常</Option>
             <Option value="disabled">已禁用</Option>
           </Select>

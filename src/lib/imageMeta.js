@@ -1,12 +1,4 @@
-// 图床展示工具：马赛克底样式 + 元信息格式化
-export const CHECKER_BG = {
-  backgroundColor: '#fafafa',
-  backgroundImage:
-    'linear-gradient(45deg, #e8e8e8 25%, transparent 25%, transparent 75%, #e8e8e8 75%), ' +
-    'linear-gradient(45deg, #e8e8e8 25%, transparent 25%, transparent 75%, #e8e8e8 75%)',
-  backgroundPosition: '0 0, 8px 8px',
-  backgroundSize: '16px 16px',
-}
+// 图床展示工具：元信息格式化（棋盘格底样式见 ImageCard.module.less）
 
 export const formatSize = (bytes) => {
   if (!bytes) return '-'

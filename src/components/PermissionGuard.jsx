@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { Spin } from 'antd'
 import { loadMenuPermissions } from '@/lib/permissions'
+import styles from './PermissionGuard.module.less'
 
 /**
  * 路由级权限守卫：当前用户菜单权限不含该路径时重定向到 /home
@@ -22,7 +23,7 @@ export default function PermissionGuard({ path, children }) {
 
   if (allowed === null) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 120 }}>
+      <div className={styles.loadingWrap}>
         <Spin size="large" />
       </div>
     )

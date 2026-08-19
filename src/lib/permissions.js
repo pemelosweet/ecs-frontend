@@ -1,4 +1,5 @@
 import Parse from '@/lib/parse'
+import { cloud } from '@/lib/request'
 import { menuConfig } from '@/router/menuConfig'
 
 // 角色常量（与后端 cloud/admin-constants.js 保持一致）
@@ -55,7 +56,7 @@ export async function loadMenuPermissions(force = false) {
 // 拉取权限：优先服务端，异常/不可用时回退角色默认
 async function fetchMenus(user) {
   try {
-    const res = await Parse.Cloud?.run?.('getMenuPermissions')
+    const res = await cloud('getMenuPermissions')
     if (res && Array.isArray(res.menus) && res.menus.length) {
       return res.menus
     }

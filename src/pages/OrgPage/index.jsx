@@ -3,6 +3,7 @@ import { Card, Form, Input, Select, DatePicker, Switch, Button, Space, message }
 import dayjs from 'dayjs'
 import Parse from '@/lib/parse'
 import { zhError } from '@/lib/errorMsg'
+import styles from './index.module.less'
 
 const { TextArea } = Input
 
@@ -122,7 +123,7 @@ export default function OrgPage() {
         </Form.Item>
 
         <Form.Item name="establishDate" label="成立日期">
-          <DatePicker style={{ width: '100%' }} />
+          <DatePicker className={styles.fullPicker} />
         </Form.Item>
 
         <Form.Item name="status" label="是否启用" valuePropName="checked">

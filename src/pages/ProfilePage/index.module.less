@@ -1,0 +1,77 @@
+// ProfilePage 样式：CSS Modules
+// antd 组件覆盖统一用「双类选择器」提升优先级，避免与 CSS-in-JS 注入顺序竞态
+
+/* ===== 头像区 ===== */
+.avatarSpace {
+  &:global(.ant-space) {
+    width: 100%;
+  }
+}
+
+.avatarImg {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+}
+
+.avatarPlaceholder {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarIcon {
+  font-size: 48px;
+  color: #ccc;
+}
+
+.avatarTip {
+  color: #999;
+  font-size: 12px;
+}
+
+/* ===== 分区卡片 ===== */
+.sectionCard {
+  margin-bottom: 16px;
+}
+
+/* ===== 动态列表行（教育/工作/项目/社交链接） ===== */
+.listRow {
+  &:global(.ant-space) {
+    display: flex;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+.listRowSimple {
+  &:global(.ant-space) {
+    display: flex;
+    margin-bottom: 8px;
+  }
+}
+
+/* ===== 表单控件宽度 ===== */
+.birthdayPicker {
+  &:global(.ant-picker) {
+    width: 100%;
+  }
+}
+
+.descInput {
+  &:global(.ant-input) {
+    width: 240px;
+  }
+}
+
+.urlInput {
+  &:global(.ant-input) {
+    width: 320px;
+  }
+}

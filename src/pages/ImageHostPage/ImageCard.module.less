@@ -1,0 +1,67 @@
+// ImageCard 样式：CSS Modules
+
+/* 卡片固定尺寸（与 index 的 grid 列宽 250px 保持一致） */
+.card {
+  &:global(.ant-card) {
+    width: 250px;
+    height: 322px;
+    display: flex;
+    flex-direction: column;
+
+    :global(.ant-card-body) {
+      padding: 12px 16px;
+      flex: 1;
+    }
+  }
+}
+
+/* 封面：棋盘格背景凸显透明区域 */
+.cover {
+  position: relative;
+  background-color: #fafafa;
+  background-image:
+    linear-gradient(45deg, #e8e8e8 25%, transparent 25%, transparent 75%, #e8e8e8 75%),
+    linear-gradient(45deg, #e8e8e8 25%, transparent 25%, transparent 75%, #e8e8e8 75%);
+  background-position:
+    0 0,
+    8px 8px;
+  background-size: 16px 16px;
+
+  .coverImg {
+    object-fit: contain;
+    display: block;
+  }
+}
+
+.deleteBtn {
+  &:global(.ant-btn) {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* 卡片正文三行信息 */
+.cardName {
+  &:global(.ant-typography) {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+}
+
+.cardMeta {
+  &:global(.ant-typography) {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+}
+
+.cardMetaLast {
+  &:global(.ant-typography) {
+    display: block;
+    font-size: 14px;
+  }
+}

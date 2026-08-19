@@ -1,0 +1,95 @@
+// MainLayout 样式：CSS Modules
+// 边框/文字色与全局主题对齐（antd 默认 colorBorderSecondary=#f0f0f0，colorPrimary=#2f54eb）
+
+.layout {
+  min-height: 100vh;
+}
+
+.sider {
+  &:global(.ant-layout-sider) {
+    border-right: 1px solid #f0f0f0;
+  }
+}
+
+/* 品牌区 */
+.brand {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+
+  .brandMark {
+    color: #2f54eb;
+    font-size: 18px;
+  }
+}
+
+.menu {
+  &:global(.ant-menu) {
+    border-inline-end: none;
+  }
+}
+
+/* 顶栏 */
+.header {
+  &:global(.ant-layout-header) {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+  }
+}
+
+.collapseBtn {
+  &:global(.ant-btn) {
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.headerTitle {
+  margin-left: 8px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.headerRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.userTrigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.roleTag {
+  &:global(.ant-tag) {
+    margin-inline-end: 0;
+  }
+}
+
+/* 内容区 */
+.content {
+  margin: 16px;
+
+  .breadcrumb {
+    margin-bottom: 16px;
+  }
+
+  .loadingWrap {
+    display: flex;
+    justify-content: center;
+    padding-top: 80px;
+  }
+}

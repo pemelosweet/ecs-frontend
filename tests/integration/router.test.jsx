@@ -32,8 +32,8 @@ describe('路由与布局集成', () => {
         <App />
       </MemoryRouter>
     )
-    // 首页内容出现（AI 问答界面）
-    expect(await screen.findByText('你好，我是知识库助手')).toBeInTheDocument()
+    // 首页内容出现（知识库问答界面）
+    expect(await screen.findByText('知识库问答')).toBeInTheDocument()
     // 侧边菜单同时存在（说明 MainLayout 生效）
     expect(screen.getByText('组织信息')).toBeInTheDocument()
     // 显示当前用户名

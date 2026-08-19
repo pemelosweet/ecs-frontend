@@ -13,7 +13,7 @@ import {
   Tag,
 } from 'antd'
 import { InboxOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
-import Parse from '@/lib/parse'
+import { cloud } from '@/lib/request'
 import { zhError } from '@/lib/errorMsg'
 import {
   ALLOWED_TYPES,
@@ -22,7 +22,8 @@ import {
   compressImage,
   readImageSize,
 } from '@/lib/imageCompress'
-import ImageCard, { CARD_W } from './ImageCard'
+import ImageCard from './ImageCard'
+import styles from './index.module.less'
 
 const PAGE_SIZE = 12
 
@@ -53,7 +54,7 @@ export default function ImageHostPage() {
   // 数据加载（单一入口，DRY；调用方负责 loading 反馈）
   const loadImages = useCallback(async (p, f) => {
     try {
-      const res = await Parse.Cloud.run('imageHostList', buildParams(p, f))
+      const res = await cloud('imageHostList', buildParams(p, f))
       setImages(res.results || [])
       setTotal(res.total || 0)
       setQuota(res.quota || null)
@@ -146,7 +147,7 @@ export default function ImageHostPage() {
       // 1. 前端压缩（GIF 原样；异常回退原文件）
       const { file: payload } = await compressImage(file)
       // 2. 申请票据（用压缩后的类型；配额/类型由服务端把关）
-      const ticket = await Parse.Cloud.run('imageHostUploadTicket', {
+      const ticket = await cloud('imageHostUploadTicket', {
         contentType: payload.type,
       })
       if (payload.size > ticket.maxSize) {
@@ -157,7 +158,7 @@ export default function ImageHostPage() {
       await postFileToOss(ticket, payload)
       // 4. 读压缩后尺寸 + 登记（name 保留原始文件名）
       const sizeMeta = await readImageSize(payload)
-      await Parse.Cloud.run('imageHostRegister', {
+      await cloud('imageHostRegister', {
         key: ticket.key,
         token: ticket.token,
         name: file.name,
@@ -178,7 +179,7 @@ export default function ImageHostPage() {
 
   const handleDelete = async (item) => {
     try {
-      await Parse.Cloud.run('imageHostDelete', { id: item.id })
+      await cloud('imageHostDelete', { id: item.id })
       message.success('已删除')
       if (images.length === 1 && page > 1)
         setPage(page - 1) // 本页删空则回上一页
@@ -207,7 +208,7 @@ export default function ImageHostPage() {
         maxCount={1}
         disabled={uploading}
         beforeUpload={beforeUpload}
-        style={{ marginBottom: 24 }}
+        className={styles.dragger}
       >
         <p className="ant-upload-drag-icon">
           <InboxOutlined />
@@ -220,14 +221,14 @@ export default function ImageHostPage() {
         </p>
       </Upload.Dragger>
 
-      {uploading && <Progress percent={progress} style={{ marginBottom: 24 }} />}
+      {uploading && <Progress percent={progress} className={styles.progress} />}
 
-      <Space style={{ marginBottom: 16 }} wrap>
+      <Space className={styles.filterBar} wrap>
         <Input
           placeholder="图片名称"
           prefix={<SearchOutlined />}
           allowClear
-          style={{ width: 200 }}
+          className={styles.nameInput}
           value={nameInput}
           onChange={(e) => setNameInput(e.target.value)}
           onPressEnter={doSearch}
@@ -245,18 +246,12 @@ export default function ImageHostPage() {
         <Empty description={hasSearch ? '未找到匹配的图片' : '还没有图片，上传第一张试试'} />
       ) : (
         <>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: `repeat(auto-fill, ${CARD_W}px)`,
-              gap: 16,
-            }}
-          >
+          <div className={styles.imageGrid}>
             {images.map((item) => (
               <ImageCard key={item.id} item={item} onDelete={handleDelete} />
             ))}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
+          <div className={styles.pagerWrap}>
             <Pagination
               current={page}
               pageSize={PAGE_SIZE}

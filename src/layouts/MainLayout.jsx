@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu, Breadcrumb, Button, Avatar, theme, Dropdown, message, Tag, Spin } from 'antd'
+import { Layout, Menu, Breadcrumb, Button, Avatar, Dropdown, message, Tag, Spin } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -10,6 +10,7 @@ import {
 import { menuConfig, findMenuByPath } from '@/router/menuConfig'
 import { loadMenuPermissions, clearMenuCache, isAdmin } from '@/lib/permissions'
 import Parse from '@/lib/parse'
+import styles from './MainLayout.module.less'
 
 const { Header, Sider, Content } = Layout
 
@@ -18,9 +19,6 @@ export default function MainLayout() {
   const [menus, setMenus] = useState(null) // null = 权限加载中
   const navigate = useNavigate()
   const location = useLocation()
-  const {
-    token: { colorBorderSecondary, colorTextSecondary, colorPrimary },
-  } = theme.useToken()
 
   const current = findMenuByPath(location.pathname)
   const currentUser = Parse.User.current()
@@ -56,30 +54,18 @@ export default function MainLayout() {
   const allowedMenus = menus ? menuConfig.filter((m) => menus.includes(m.key)) : []
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout className={styles.layout}>
       <Sider
         trigger={null}
         collapsible
         collapsed={collapsed}
         theme="light"
         width={208}
-        style={{ borderRight: `1px solid ${colorBorderSecondary}` }}
+        className={styles.sider}
       >
         {/* 品牌区 */}
-        <div
-          style={{
-            height: 56,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            fontWeight: 600,
-            fontSize: 16,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-          }}
-        >
-          <span style={{ color: colorPrimary, fontSize: 18 }}>◆</span>
+        <div className={styles.brand}>
+          <span className={styles.brandMark}>◆</span>
           {!collapsed && <span>中后台管理系统</span>}
         </div>
         <Menu
@@ -87,60 +73,44 @@ export default function MainLayout() {
           selectedKeys={[location.pathname]}
           items={menus ? allowedMenus : []}
           onClick={({ key }) => navigate(key)}
-          style={{ borderInlineEnd: 'none' }}
+          className={styles.menu}
         />
       </Sider>
       <Layout>
-        <Header
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            borderBottom: `1px solid ${colorBorderSecondary}`,
-          }}
-        >
+        <Header className={styles.header}>
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
-            style={{ fontSize: 16, width: 40, height: 40 }}
+            className={styles.collapseBtn}
           />
-          <span style={{ marginLeft: 8, fontWeight: 600, fontSize: 16 }}>
-            {current?.label || ''}
-          </span>
+          <span className={styles.headerTitle}>{current?.label || ''}</span>
           {/* 右侧用户区 */}
-          <div
-            style={{
-              marginLeft: 'auto',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              color: colorTextSecondary,
-            }}
-          >
+          <div className={styles.headerRight}>
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              <div className={styles.userTrigger}>
                 <Avatar size={28} icon={<UserOutlined />} />
                 <span>{currentUser?.get('username') || '用户'}</span>
                 {isAdmin(currentUser) ? (
-                  <Tag color="blue" style={{ marginInlineEnd: 0 }}>
+                  <Tag color="blue" className={styles.roleTag}>
                     管理员
                   </Tag>
                 ) : (
-                  <Tag style={{ marginInlineEnd: 0 }}>普通用户</Tag>
+                  <Tag className={styles.roleTag}>普通用户</Tag>
                 )}
               </div>
             </Dropdown>
           </div>
         </Header>
-        <Content style={{ margin: 16 }}>
+        <Content className={styles.content}>
           <Breadcrumb
-            style={{ marginBottom: 16 }}
+            className={styles.breadcrumb}
             items={[{ title: '首页' }, { title: current?.label || '未知页面' }]}
           />
           {menus ? (
             <Outlet />
           ) : (
-            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
+            <div className={styles.loadingWrap}>
               <Spin size="large" />
             </div>
           )}

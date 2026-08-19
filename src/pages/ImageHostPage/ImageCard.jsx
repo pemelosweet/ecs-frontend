@@ -1,11 +1,10 @@
 import { Card, Popconfirm, Button, Typography, message, Image } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
-import { CHECKER_BG, formatSize, formatMime, formatDate, formatDimensions } from '@/lib/imageMeta'
+import { formatSize, formatMime, formatDate, formatDimensions } from '@/lib/imageMeta'
+import styles from './ImageCard.module.less'
 
 const { Text } = Typography
 
-export const CARD_W = 250
-const CARD_H = 322
 const COVER_H = 150
 
 // 图片加载失败占位（内联 SVG data URI，不依赖外部资源）
@@ -32,21 +31,15 @@ export default function ImageCard({ item, onDelete }) {
   return (
     <Card
       size="small"
-      style={{
-        width: CARD_W,
-        height: CARD_H,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      styles={{ body: { padding: '12px 16px', flex: 1 } }}
+      className={styles.card}
       cover={
-        <div style={{ position: 'relative', ...CHECKER_BG }}>
+        <div className={styles.cover}>
           <Image
             src={item.url}
             alt={name}
             height={COVER_H}
             width="100%"
-            style={{ objectFit: 'contain', display: 'block' }}
+            className={styles.coverImg}
             fallback={FALLBACK_IMG}
             preview={{ mask: '点击预览' }}
           />
@@ -57,12 +50,7 @@ export default function ImageCard({ item, onDelete }) {
               danger
               aria-label={`删除图片 ${name}`}
               icon={<DeleteOutlined />}
-              style={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                background: 'rgba(255,255,255,0.9)',
-              }}
+              className={styles.deleteBtn}
             />
           </Popconfirm>
         </div>
@@ -89,13 +77,13 @@ export default function ImageCard({ item, onDelete }) {
         </Button>,
       ]}
     >
-      <Text ellipsis style={{ display: 'block', fontSize: 16, marginBottom: 4 }}>
+      <Text ellipsis className={styles.cardName}>
         {name}
       </Text>
-      <Text type="secondary" style={{ display: 'block', fontSize: 14, marginBottom: 4 }}>
+      <Text type="secondary" className={styles.cardMeta}>
         {formatMime(item.mime)} | {formatDate(item.createdAt)}
       </Text>
-      <Text type="secondary" style={{ display: 'block', fontSize: 14 }}>
+      <Text type="secondary" className={styles.cardMetaLast}>
         {[formatSize(item.size), formatDimensions(item.width, item.height)]
           .filter(Boolean)
           .join(' | ')}

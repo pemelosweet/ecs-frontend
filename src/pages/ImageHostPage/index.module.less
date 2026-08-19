@@ -1,0 +1,36 @@
+// ImageHostPage 样式：CSS Modules
+
+.dragger {
+  &:global(.ant-upload-wrapper) {
+    margin-bottom: 24px;
+  }
+}
+
+.progress {
+  margin-bottom: 24px;
+}
+
+.filterBar {
+  &:global(.ant-space) {
+    margin-bottom: 16px;
+  }
+}
+
+.nameInput {
+  &:global(.ant-input-affix-wrapper) {
+    width: 200px;
+  }
+}
+
+/* 卡片网格：列宽与 ImageCard 固定宽 250px 对齐 */
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 250px);
+  gap: 16px;
+}
+
+.pagerWrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}

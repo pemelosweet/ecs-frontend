@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Card, Table, Checkbox, Button, Space, Tag, Tooltip, Alert, message, Spin } from 'antd'
 import { SaveOutlined } from '@ant-design/icons'
-import Parse from '@/lib/parse'
+import { cloud } from '@/lib/request'
 import { zhError } from '@/lib/errorMsg'
 import { menuConfig } from '@/router/menuConfig'
+import styles from './index.module.less'
 
 const ROLE_LABELS = {
   user: '普通用户',
@@ -22,7 +23,7 @@ export default function PermissionPage() {
     let mounted = true
     ;(async () => {
       try {
-        const res = await Parse.Cloud.run('adminGetMenuPermissions')
+        const res = await cloud('adminGetMenuPermissions')
         if (!mounted) return
         setUserMenus(res.user || [])
         setAdminMenus(res.admin || [])
@@ -48,7 +49,7 @@ export default function PermissionPage() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const res = await Parse.Cloud.run('adminUpdateMenuPermissions', {
+      const res = await cloud('adminUpdateMenuPermissions', {
         permissions: { user: userMenus, admin: adminMenus },
       })
       setUserMenus(res.user)
@@ -93,7 +94,7 @@ export default function PermissionPage() {
           <Tooltip title="普通用户不可拥有">
             <Space size={4}>
               {checkbox}
-              <Tag color="default" style={{ marginInlineEnd: 0 }}>
+              <Tag color="default" className={styles.lockTag}>
                 仅管理员
               </Tag>
             </Space>
@@ -122,7 +123,7 @@ export default function PermissionPage() {
           <Tooltip title="管理员默认拥有，禁止取消">
             <Space size={4}>
               {checkbox}
-              <Tag color="gold" style={{ marginInlineEnd: 0 }}>
+              <Tag color="gold" className={styles.lockTag}>
                 锁定
               </Tag>
             </Space>
@@ -143,7 +144,7 @@ export default function PermissionPage() {
   if (loading) {
     return (
       <Card title="权限管理">
-        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
+        <div className={styles.loadingWrap}>
           <Spin size="large" />
         </div>
       </Card>
@@ -162,7 +163,7 @@ export default function PermissionPage() {
       <Alert
         type="info"
         showIcon
-        style={{ marginBottom: 16 }}
+        className={styles.tipAlert}
         message="勾选控制各角色可访问的菜单。权限管理和用户管理为管理员专属：管理员默认拥有、禁止取消；普通用户不可勾选。"
       />
       <Table rowKey="key" columns={columns} dataSource={dataSource} pagination={false} bordered />

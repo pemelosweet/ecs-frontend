@@ -3,7 +3,9 @@ import { Card, Upload, Table, Tag, Button, Popconfirm, Empty, Drawer, message } 
 import { InboxOutlined, DeleteOutlined, DownloadOutlined, ProfileOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import Parse from '@/lib/parse'
+import { cloud } from '@/lib/request'
 import { zhError } from '@/lib/errorMsg'
+import styles from './index.module.less'
 
 const ACCEPT_TYPES = '.pdf,.docx,.txt,.md,.markdown,.xlsx'
 const PAGE_SIZE = 10
@@ -34,7 +36,7 @@ export default function KnowledgeBasePage() {
   const loadList = useCallback(async (p) => {
     setLoading(true)
     try {
-      const res = await Parse.Cloud.run('knowledgeList', { page: p, pageSize: PAGE_SIZE })
+      const res = await cloud('knowledgeList', { page: p, pageSize: PAGE_SIZE })
       setList(res.list || [])
       setTotal(res.total || 0)
     } catch (err) {
@@ -65,7 +67,7 @@ export default function KnowledgeBasePage() {
       const safeName = `doc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${safeExt}`
       const pf = new Parse.File(safeName, file)
       await pf.save()
-      const res = await Parse.Cloud.run('knowledgeUpload', {
+      const res = await cloud('knowledgeUpload', {
         file: pf,
         title: file.name,
         mimeType: file.type,
@@ -82,7 +84,7 @@ export default function KnowledgeBasePage() {
 
   const handleDelete = async (record) => {
     try {
-      await Parse.Cloud.run('knowledgeDelete', { id: record.id })
+      await cloud('knowledgeDelete', { id: record.id })
       message.success(`已删除「${record.title}」`)
       const nextPage = list.length === 1 && page > 1 ? page - 1 : page
       await loadList(nextPage)
@@ -96,7 +98,7 @@ export default function KnowledgeBasePage() {
     setChunksList([])
     setChunksLoading(true)
     try {
-      const res = await Parse.Cloud.run('knowledgeChunks', { id: record.id })
+      const res = await cloud('knowledgeChunks', { id: record.id })
       setChunksList(res.list || [])
     } catch (err) {
       message.error(zhError(err, '加载切块失败'))
@@ -110,6 +112,7 @@ export default function KnowledgeBasePage() {
       title: '标题',
       dataIndex: 'title',
       key: 'title',
+      width: 90,
       ellipsis: true,
     },
     {
@@ -193,7 +196,7 @@ export default function KnowledgeBasePage() {
         multiple={false}
         disabled={uploading}
         beforeUpload={beforeUpload}
-        style={{ marginBottom: 24 }}
+        className={styles.dragger}
       >
         <p className="ant-upload-drag-icon">
           <InboxOutlined />
@@ -235,33 +238,14 @@ export default function KnowledgeBasePage() {
         width={560}
       >
         {chunksLoading ? (
-          <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>加载中…</div>
+          <div className={styles.chunkLoading}>加载中…</div>
         ) : (
           chunksList.map((c) => (
-            <div
-              key={c.id}
-              style={{
-                marginBottom: 16,
-                padding: 12,
-                background: '#f8fafc',
-                borderRadius: 8,
-                border: '1px solid #eef1f6',
-              }}
-            >
-              <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 6 }}>
+            <div key={c.id} className={styles.chunkCard}>
+              <div className={styles.chunkMeta}>
                 块 {c.chunkIndex + 1} ｜ {c.content.length} 字 ｜ 约 {c.tokenCount} token
               </div>
-              <div
-                style={{
-                  fontSize: 13,
-                  lineHeight: 1.7,
-                  color: '#1e293b',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                }}
-              >
-                {c.content}
-              </div>
+              <div className={styles.chunkContent}>{c.content}</div>
             </div>
           ))
         )}

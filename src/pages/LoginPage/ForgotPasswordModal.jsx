@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Modal, Form, Input, Button, Space, message } from 'antd'
 import { UserOutlined, LockOutlined, MobileOutlined, SafetyOutlined } from '@ant-design/icons'
-import Parse from '@/lib/parse'
+import { cloud } from '@/lib/request'
 import { zhError } from '@/lib/errorMsg'
+import styles from './ForgotPasswordModal.module.less'
 
 // 忘记密码弹窗：单屏表单（账号 + 验证码 + 新密码一次填完）
 // 服务端入口：resetPasswordSmsSend（username+phone 匹配才发码）、resetPassword（校验码+改密）
@@ -29,7 +30,7 @@ export default function ForgotPasswordModal({ open, onClose }) {
     }
     setSending(true)
     try {
-      await Parse.Cloud.run('resetPasswordSmsSend', {
+      await cloud('resetPasswordSmsSend', {
         username: values.username,
         phone: values.phone,
       })
@@ -52,7 +53,7 @@ export default function ForgotPasswordModal({ open, onClose }) {
     }
     setResetting(true)
     try {
-      await Parse.Cloud.run('resetPassword', {
+      await cloud('resetPassword', {
         username: values.username,
         phone: values.phone,
         smsCode: values.smsCode,
@@ -83,12 +84,12 @@ export default function ForgotPasswordModal({ open, onClose }) {
       destroyOnClose
       maskClosable={false}
     >
-      <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
+      <Form form={form} layout="vertical" className={styles.form}>
         <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
           <Input prefix={<UserOutlined />} placeholder="用户名" size="large" />
         </Form.Item>
         <Form.Item>
-          <Space.Compact style={{ width: '100%' }}>
+          <Space.Compact className={styles.phoneRow}>
             <Form.Item
               name="phone"
               noStyle
@@ -109,7 +110,7 @@ export default function ForgotPasswordModal({ open, onClose }) {
               onClick={sendSms}
               loading={sending}
               disabled={countdown > 0}
-              style={{ width: 120 }}
+              className={styles.smsBtn}
             >
               {countdown > 0 ? `${countdown}s 后重发` : '获取验证码'}
             </Button>
@@ -148,7 +149,7 @@ export default function ForgotPasswordModal({ open, onClose }) {
         >
           <Input.Password prefix={<LockOutlined />} placeholder="确认新密码" size="large" />
         </Form.Item>
-        <Form.Item style={{ marginBottom: 0 }}>
+        <Form.Item className={styles.submitRow}>
           <Button type="primary" block size="large" loading={resetting} onClick={doReset}>
             重置密码
           </Button>

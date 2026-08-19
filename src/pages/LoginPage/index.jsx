@@ -6,6 +6,7 @@ import Parse from '@/lib/parse'
 import { zhError } from '@/lib/errorMsg'
 import { clearMenuCache } from '@/lib/permissions'
 import ForgotPasswordModal from './ForgotPasswordModal'
+import styles from './index.module.less'
 
 const { Title } = Typography
 
@@ -29,17 +30,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#f5f7fa',
-      }}
-    >
-      <Card style={{ width: 400 }}>
-        <Title level={3} style={{ textAlign: 'center', marginBottom: 32 }}>
+    <div className={styles.page}>
+      <Card className={styles.card}>
+        <Title level={3} className={styles.title}>
           登录
         </Title>
         <Form layout="vertical" onFinish={onFinish}>
@@ -54,7 +47,7 @@ export default function LoginPage() {
               登录
             </Button>
           </Form.Item>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className={styles.footerRow}>
             <a onClick={() => setForgotOpen(true)}>忘记密码？</a>
             <span>
               还没有账号？<Link to="/register">立即注册</Link>

@@ -5,6 +5,7 @@ import { PlusOutlined, MinusCircleOutlined, UserOutlined } from '@ant-design/ico
 import dayjs from 'dayjs'
 import Parse from '@/lib/parse'
 import { zhError } from '@/lib/errorMsg'
+import styles from './index.module.less'
 
 const { TextArea } = Input
 
@@ -176,43 +177,23 @@ export default function ProfilePage() {
       >
         {/* 头像区 */}
         <Form.Item label="头像">
-          <Space direction="vertical" align="center" style={{ width: '100%' }}>
+          <Space direction="vertical" align="center" className={styles.avatarSpace}>
             {avatarPreview ? (
-              <img
-                src={avatarPreview}
-                alt="avatar"
-                style={{
-                  width: 140,
-                  height: 140,
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                  border: '2px solid #eee',
-                }}
-              />
+              <img src={avatarPreview} alt="avatar" className={styles.avatarImg} />
             ) : (
-              <div
-                style={{
-                  width: 140,
-                  height: 140,
-                  borderRadius: '50%',
-                  background: '#f5f5f5',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <UserOutlined style={{ fontSize: 48, color: '#ccc' }} />
+              <div className={styles.avatarPlaceholder}>
+                <UserOutlined className={styles.avatarIcon} />
               </div>
             )}
             <Upload accept={AVATAR_ACCEPT} showUploadList={false} beforeUpload={beforeUpload}>
               <Button>选择头像</Button>
             </Upload>
-            <div style={{ color: '#999', fontSize: 12 }}>JPG / PNG / WebP，不超过 5MB</div>
+            <div className={styles.avatarTip}>JPG / PNG / WebP，不超过 5MB</div>
           </Space>
         </Form.Item>
 
         {/* 基本信息 */}
-        <Card type="inner" title="基本信息" style={{ marginBottom: 16 }}>
+        <Card type="inner" title="基本信息" className={styles.sectionCard}>
           <Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}>
             <Input placeholder="你的姓名" />
           </Form.Item>
@@ -224,7 +205,7 @@ export default function ProfilePage() {
             </Radio.Group>
           </Form.Item>
           <Form.Item name="birthday" label="生日">
-            <DatePicker style={{ width: '100%' }} />
+            <DatePicker className={styles.birthdayPicker} />
           </Form.Item>
           <Form.Item name="phone" label="手机">
             <Input placeholder="13800138000" />
@@ -246,30 +227,26 @@ export default function ProfilePage() {
         </Card>
 
         {/* 技能（标签） */}
-        <Card type="inner" title="技能" style={{ marginBottom: 16 }}>
+        <Card type="inner" title="技能" className={styles.sectionCard}>
           <Form.Item name="skills">
             <Select placeholder="回车添加技能" mode="tags" />
           </Form.Item>
         </Card>
 
         {/* 兴趣爱好（标签） */}
-        <Card type="inner" title="兴趣爱好" style={{ marginBottom: 16 }}>
+        <Card type="inner" title="兴趣爱好" className={styles.sectionCard}>
           <Form.Item name="interests">
             <Select placeholder="回车添加兴趣" mode="tags" />
           </Form.Item>
         </Card>
 
         {/* 教育经历（动态多条） */}
-        <Card type="inner" title="教育经历" style={{ marginBottom: 16 }}>
+        <Card type="inner" title="教育经历" className={styles.sectionCard}>
           <Form.List name="education">
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Space
-                    key={key}
-                    style={{ display: 'flex', marginBottom: 8, flexWrap: 'wrap' }}
-                    align="baseline"
-                  >
+                  <Space key={key} className={styles.listRow} align="baseline">
                     <Form.Item
                       {...restField}
                       name={[name, 'school']}
@@ -303,16 +280,12 @@ export default function ProfilePage() {
         </Card>
 
         {/* 工作经历（动态多条） */}
-        <Card type="inner" title="工作经历" style={{ marginBottom: 16 }}>
+        <Card type="inner" title="工作经历" className={styles.sectionCard}>
           <Form.List name="work">
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Space
-                    key={key}
-                    style={{ display: 'flex', marginBottom: 8, flexWrap: 'wrap' }}
-                    align="baseline"
-                  >
+                  <Space key={key} className={styles.listRow} align="baseline">
                     <Form.Item
                       {...restField}
                       name={[name, 'company']}
@@ -330,7 +303,7 @@ export default function ProfilePage() {
                       <Input placeholder="结束" />
                     </Form.Item>
                     <Form.Item {...restField} name={[name, 'desc']}>
-                      <Input placeholder="简述" style={{ width: 240 }} />
+                      <Input placeholder="简述" className={styles.descInput} />
                     </Form.Item>
                     <MinusCircleOutlined onClick={() => remove(name)} />
                   </Space>
@@ -346,16 +319,12 @@ export default function ProfilePage() {
         </Card>
 
         {/* 项目经历（动态多条） */}
-        <Card type="inner" title="项目经历" style={{ marginBottom: 16 }}>
+        <Card type="inner" title="项目经历" className={styles.sectionCard}>
           <Form.List name="projects">
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Space
-                    key={key}
-                    style={{ display: 'flex', marginBottom: 8, flexWrap: 'wrap' }}
-                    align="baseline"
-                  >
+                  <Space key={key} className={styles.listRow} align="baseline">
                     <Form.Item
                       {...restField}
                       name={[name, 'name']}
@@ -370,7 +339,7 @@ export default function ProfilePage() {
                       <Input placeholder="时间" />
                     </Form.Item>
                     <Form.Item {...restField} name={[name, 'desc']}>
-                      <Input placeholder="简述" style={{ width: 240 }} />
+                      <Input placeholder="简述" className={styles.descInput} />
                     </Form.Item>
                     <MinusCircleOutlined onClick={() => remove(name)} />
                   </Space>
@@ -386,12 +355,12 @@ export default function ProfilePage() {
         </Card>
 
         {/* 社交链接（动态键值对） */}
-        <Card type="inner" title="社交链接" style={{ marginBottom: 16 }}>
+        <Card type="inner" title="社交链接" className={styles.sectionCard}>
           <Form.List name="socialLinks">
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                  <Space key={key} className={styles.listRowSimple} align="baseline">
                     <Form.Item
                       {...restField}
                       name={[name, 'platform']}
@@ -400,7 +369,7 @@ export default function ProfilePage() {
                       <Input placeholder="平台（如 github）" />
                     </Form.Item>
                     <Form.Item {...restField} name={[name, 'url']}>
-                      <Input placeholder="https://..." style={{ width: 320 }} />
+                      <Input placeholder="https://..." className={styles.urlInput} />
                     </Form.Item>
                     <MinusCircleOutlined onClick={() => remove(name)} />
                   </Space>

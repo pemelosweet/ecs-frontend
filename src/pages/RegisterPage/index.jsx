@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Card, Form, Input, Button, Typography, message, Space } from 'antd'
 import { UserOutlined, LockOutlined, MobileOutlined, SafetyOutlined } from '@ant-design/icons'
-import Parse from '@/lib/parse'
+import { cloud } from '@/lib/request'
 import { zhError } from '@/lib/errorMsg'
+import styles from './index.module.less'
 
 const { Title } = Typography
 
@@ -41,7 +42,7 @@ export default function RegisterPage() {
     }
     setSmsLoading(true)
     try {
-      await Parse.Cloud.run('smsSend', { phone })
+      await cloud('smsSend', { phone })
       setCountdown(60)
       message.success('验证码已发送，5 分钟内有效')
     } catch (err) {
@@ -57,7 +58,7 @@ export default function RegisterPage() {
     const values = form.getFieldsValue()
     setLoading(true)
     try {
-      await Parse.Cloud.run('register', {
+      await cloud('register', {
         username: values.username,
         password: values.password,
         phone: values.phone,
@@ -127,17 +128,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#f5f7fa',
-      }}
-    >
-      <Card style={{ width: 400 }}>
-        <Title level={3} style={{ textAlign: 'center', marginBottom: 32 }}>
+    <div className={styles.page}>
+      <Card className={styles.card}>
+        <Title level={3} className={styles.title}>
           注册
         </Title>
         <Form form={form} layout="vertical">
@@ -169,7 +162,7 @@ export default function RegisterPage() {
             <Input.Password prefix={<LockOutlined />} placeholder="确认密码" size="large" />
           </Form.Item>
           <Form.Item>
-            <Space.Compact style={{ width: '100%' }}>
+            <Space.Compact className={styles.phoneRow}>
               <Form.Item
                 name="phone"
                 noStyle
@@ -190,7 +183,7 @@ export default function RegisterPage() {
                 onClick={sendSms}
                 loading={smsLoading}
                 disabled={countdown > 0}
-                style={{ width: 120 }}
+                className={styles.smsBtn}
               >
                 {countdown > 0 ? `${countdown}s 后重发` : '获取验证码'}
               </Button>
@@ -215,7 +208,7 @@ export default function RegisterPage() {
               注册
             </Button>
           </Form.Item>
-          <div style={{ textAlign: 'center' }}>
+          <div className={styles.footerLink}>
             已有账号？<Link to="/login">去登录</Link>
           </div>
         </Form>
