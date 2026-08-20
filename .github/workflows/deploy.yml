@@ -7,6 +7,8 @@ on:
   # 其他仓库 push 后通过 repository_dispatch 触发本 workflow
   repository_dispatch:
     types: [deploy]
+  # 手动触发：GitHub UI → Actions → Deploy → Run workflow（重跑/补部署不用推代码）
+  workflow_dispatch:
 
 concurrency:
   group: deploy
