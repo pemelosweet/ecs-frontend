@@ -3,8 +3,140 @@
 
 .page {
   display: flex;
-  flex-direction: column;
   height: calc(100vh - 150px);
+}
+
+/* ===== 历史会话侧边栏 ===== */
+.sidebar {
+  width: 264px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #eef1f6;
+  border-radius: 8px;
+  padding: 12px;
+  margin-right: 12px;
+}
+
+.sidebarTop {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  .newChatBtn {
+    &:global(.ant-btn) {
+      flex: 1;
+    }
+  }
+
+  .foldBtn {
+    &:global(.ant-btn) {
+      color: #64748b;
+    }
+  }
+}
+
+.sessionList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scrollbar-width: thin;
+}
+
+.sessionEmpty {
+  color: #b6c0cf;
+  font-size: 12px;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.sessionItem,
+.sessionItemActive {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  .sessionDel {
+    opacity: 0;
+  }
+
+  &:hover {
+    background: #f5f7fa;
+
+    .sessionDel {
+      opacity: 1;
+    }
+  }
+}
+
+.sessionItemActive {
+  background: #eef2ff;
+
+  &:hover {
+    background: #eef2ff;
+  }
+
+  .sessionTitle {
+    color: #2f54eb;
+  }
+}
+
+.sessionIcon {
+  color: #94a3b8;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.sessionMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.sessionTitle {
+  font-size: 13px;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sessionTime {
+  font-size: 11px;
+  color: #b6c0cf;
+  margin-top: 2px;
+}
+
+.sessionDel {
+  &:global(.ant-btn) {
+    color: #94a3b8;
+  }
+
+  flex-shrink: 0;
+}
+
+/* ===== 主聊天区 ===== */
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.unfoldBtn {
+  &:global(.ant-btn) {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    z-index: 1;
+    color: #64748b;
+  }
 }
 
 /* ===== 消息滚动区 ===== */
